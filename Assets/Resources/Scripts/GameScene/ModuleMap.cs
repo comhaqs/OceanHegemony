@@ -49,19 +49,21 @@ public class ModuleMap : MonoBehaviour
         for (int i = 0; i < size_x; ++i) {
             for (int j = 0; j < size_y; ++j) {
                 var info = new InfoBlock() { index = ToIndex(i, j), x = i, y = j, block = Instantiate(block_template, root.transform) };
+                info.block.name = string.Format("block_{0}_{1}", i, j);
                 info.block.transform.position = ToPosition(info.x, info.y);
                 info.block.type = BLOCK_TYPE.BLOCK_OCEAN;
                 blocks[info.index] = info;
             }
         }
-        for (int m = 0; m < 15; ++m) {
+        for (int m = 0; m < 10; ++m) {
             int s = UnityEngine.Random.Range(6, 12);
-            var index = ToIndex(UnityEngine.Random.Range(0, size_x - s - 1), UnityEngine.Random.Range(0, size_y - s - 1));
+            var x = UnityEngine.Random.Range(0, size_x - s - 1);
+            var y = UnityEngine.Random.Range(0, size_y - s - 1);
             for (int i = 0; i < s; ++i)
             {
                 for (int j = 0; j < s; ++j)
                 {
-                    blocks[index].block.type = BLOCK_TYPE.BLOCK_SELF;
+                    blocks[ToIndex(x + i, y + j)].block.type = BLOCK_TYPE.BLOCK_LAND;
                 }
             }
         }
