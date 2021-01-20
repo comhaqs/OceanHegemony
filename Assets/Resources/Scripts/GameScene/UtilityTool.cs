@@ -16,7 +16,7 @@ public class UtilityTool
     }
 
     public static Vector3 NormalSize(Vector3 pos) {
-        return new Vector3(((int)(pos.x + 0.5f * block_size) / block_size) * block_size, ((int)(pos.y + 0.5f * block_size) / block_size) * block_size, pos.z);
+        return new Vector3(Mathf.FloorToInt((pos.x + 0.5f * block_size) / block_size) * block_size, Mathf.FloorToInt((pos.y + 0.5f * block_size) / block_size) * block_size, pos.z);
     }
 
     public enum Direction
@@ -44,5 +44,10 @@ public class UtilityTool
         else {
             return Direction.DIRECTION_RIGHT;
         }
+    }
+
+    public static Vector3 ToPosition(int x, int y)
+    {
+        return new Vector3(UtilityTool.block_size * x, UtilityTool.block_size * y, 0.0f);
     }
 }

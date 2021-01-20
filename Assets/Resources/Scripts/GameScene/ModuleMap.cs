@@ -18,9 +18,8 @@ public class InfoBlock {
 
 public class ModuleMap : MonoBehaviour
 {
-    public float size_block = 0.64f;
-    public int size_x = 100;
-    public int size_y = 100;
+    public int size_x = 101;
+    public int size_y = 101;
     public ModuleBlock block_template;
     public GameObject root;
 
@@ -30,6 +29,12 @@ public class ModuleMap : MonoBehaviour
     Dictionary<int, InfoBlock> nodes = new Dictionary<int, InfoBlock>();
     void Start()
     {
+        if (1 != (size_x % 2)) {
+            size_x += 1;
+        }
+        if (1 != (size_y % 2)) {
+            size_y += 1;
+        }
         MessageManager.GetInstance().Add<InfoParam3<List<Vector3>, Vector3, Vector3>>("map_find_path", OnMapFindPath, gameObject);
         MessageManager.GetInstance().Add<Vector3>("map_block_update", OnMapBlockUpdate, gameObject);
         MessageManager.GetInstance().Add<GameObject>("map_person_update", OnMapPersonUpdate, gameObject);
@@ -46,19 +51,19 @@ public class ModuleMap : MonoBehaviour
         if (null == root) {
             root = gameObject;
         }
-        for (int i = 0; i < size_x; ++i) {
-            for (int j = 0; j < size_y; ++j) {
+        for (int i = -Mathf.FloorToInt(size_x / 2); i <= Mathf.FloorToInt(size_x / 2); ++i) {
+            for (int j = -Mathf.FloorToInt(size_y / 2); j <= Mathf.FloorToInt(size_y / 2); ++j) {
                 var info = new InfoBlock() { index = ToIndex(i, j), x = i, y = j, block = Instantiate(block_template, root.transform) };
                 info.block.name = string.Format("block_{0}_{1}", i, j);
-                info.block.transform.position = ToPosition(info.x, info.y);
+                info.block.transform.localPosition = UtilityTool.ToPosition(info.x, info.y);
                 info.block.type = BLOCK_TYPE.BLOCK_OCEAN;
                 blocks[info.index] = info;
             }
         }
         for (int m = 0; m < 10; ++m) {
             int s = UnityEngine.Random.Range(6, 12);
-            var x = UnityEngine.Random.Range(0, size_x - s - 1);
-            var y = UnityEngine.Random.Range(0, size_y - s - 1);
+            var x = UnityEngine.Random.Range(-Mathf.FloorToInt(size_x / 2), Mathf.FloorToInt(size_x / 2) - s);
+            var y = UnityEngine.Random.Range(-Mathf.FloorToInt(size_y / 2), Mathf.FloorToInt(size_y / 2) - s);
             for (int i = 0; i < s; ++i)
             {
                 for (int j = 0; j < s; ++j)
@@ -70,15 +75,13 @@ public class ModuleMap : MonoBehaviour
     }
 
     int ToIndex(int x, int y) {
-        return x * size_x + y;
+        return x * size_y + y;
     }
-    Vector3 ToPosition(int x, int y) {
-        return new Vector3(size_block * (x - (size_x / 2)), size_block * (y - (size_y / 2)), 0.0f);
-    }
+    
 
     int ToIndex(Vector3 pos) {
-        int x = (int)(pos.x / size_block);
-        int y = (int)(pos.y / size_block);
+        int x = Mathf.FloorToInt(pos.x / UtilityTool.block_size);
+        int y = Mathf.FloorToInt(pos.y / UtilityTool.block_size);
         return ToIndex(x, y);
     }
 
@@ -334,9 +337,11 @@ public class ModuleMap : MonoBehaviour
 
     IEnumerator ScaleMap() {
         yield return new WaitForSeconds(1.0f);
-        int step_x = (int)(size_x * 0.15f);
-        int step_y = (int)(size_y * 0.15f);
-        RectInt rect_origin = new RectInt(blocks[0].x, blocks[0].y, blocks[blocks.Count - 1].x - blocks[0].x, blocks[blocks.Count - 1].y - blocks[0].y);
+        int step_x = Mathf.FloorToInt(size_x * 0.15f);
+        int step_y = Mathf.FloorToInt(size_y * 0.15f);
+        var block_left_bottton = blocks[ToIndex(-Mathf.FloorToInt(size_x / 2), -Mathf.FloorToInt(size_y / 2))];
+        var block_top_right = blocks[ToIndex(Mathf.FloorToInt(size_x / 2), Mathf.FloorToInt(size_y / 2))];
+        RectInt rect_origin = new RectInt(block_left_bottton.x, block_left_bottton.y, block_top_right.x - block_left_bottton.x, block_top_right.y - block_left_bottton.y);
         RectInt rect_old = new RectInt(rect_origin.x, rect_origin.y, rect_origin.width, rect_origin.height);
         RectInt rect_new = new RectInt(rect_old.x, rect_old.y, rect_old.width, rect_old.height);
         while (true) {
@@ -364,18 +369,18 @@ public class ModuleMap : MonoBehaviour
             int count_step = 12;
             for (int i = 1; i <= count_step; ++i) {
                 var points = new List<Vector3>();
-                int x = rect_old.x + (int)((rect_new.x - rect_old.x) * i / count_step);
-                int y = rect_old.y + (int)((rect_new.y - rect_old.y) * i / count_step);
-                int width = rect_old.width + (int)((rect_new.width - rect_old.width) * i / count_step);
-                int height = rect_old.height + (int)((rect_new.height - rect_old.height) * i / count_step);
-                points.Add(ToPosition(rect_origin.x, rect_origin.y) + 0.5f * new Vector3(-size_block, -size_block, 0.0f));
-                points.Add(ToPosition(rect_origin.x, rect_origin.y + rect_origin.height) + 0.5f * new Vector3(-size_block, size_block, 0.0f));
-                points.Add(ToPosition(rect_origin.x + rect_origin.width, rect_origin.y + rect_origin.height) + 0.5f * new Vector3(size_block, size_block, 0.0f));
-                points.Add(ToPosition(rect_origin.x + rect_origin.width, rect_origin.y) + 0.5f * new Vector3(size_block, -size_block, 0.0f));
-                points.Add(ToPosition(x, y) + 0.5f * new Vector3(-size_block, -size_block, 0.0f));
-                points.Add(ToPosition(x, y + height) + 0.5f * new Vector3(-size_block, size_block, 0.0f));
-                points.Add(ToPosition(x + width, y +height) + 0.5f * new Vector3(size_block, size_block, 0.0f));
-                points.Add(ToPosition(x + width, y) + 0.5f * new Vector3(size_block, -size_block, 0.0f));
+                int x = rect_old.x + Mathf.FloorToInt((rect_new.x - rect_old.x) * i / count_step);
+                int y = rect_old.y + Mathf.FloorToInt((rect_new.y - rect_old.y) * i / count_step);
+                int width = rect_old.width + Mathf.FloorToInt((rect_new.width - rect_old.width) * i / count_step);
+                int height = rect_old.height + Mathf.FloorToInt((rect_new.height - rect_old.height) * i / count_step);
+                points.Add(UtilityTool.ToPosition(rect_origin.x, rect_origin.y) + 0.5f * new Vector3(-UtilityTool.block_size, -UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(rect_origin.x, rect_origin.y + rect_origin.height) + 0.5f * new Vector3(-UtilityTool.block_size, UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(rect_origin.x + rect_origin.width, rect_origin.y + rect_origin.height) + 0.5f * new Vector3(UtilityTool.block_size, UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(rect_origin.x + rect_origin.width, rect_origin.y) + 0.5f * new Vector3(UtilityTool.block_size, -UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(x, y) + 0.5f * new Vector3(-UtilityTool.block_size, -UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(x, y + height) + 0.5f * new Vector3(-UtilityTool.block_size, UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(x + width, y +height) + 0.5f * new Vector3(UtilityTool.block_size, UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(x + width, y) + 0.5f * new Vector3(UtilityTool.block_size, -UtilityTool.block_size, 0.0f));
                 Mesh mesh = new Mesh();
                 mesh.vertices = points.ToArray();
                 var triangles = new List<int>() { 0,1,5, 5,4,0, 1,2,6, 6,5,1, 2,3,7, 7,6,2, 3,0,4, 4,7,3};
@@ -384,7 +389,7 @@ public class ModuleMap : MonoBehaviour
                 mesh.RecalculateNormals();
                 mesh_filter.mesh = mesh;
 
-                int time_action = (int)(12.0f / count_step);
+                int time_action = Mathf.FloorToInt(12.0f / count_step);
                 for (int j = 0; j < time_action; ++j) {
                     var list_blocks = new Dictionary<int, InfoBlock>();
                     foreach (var kv in nodes) {
