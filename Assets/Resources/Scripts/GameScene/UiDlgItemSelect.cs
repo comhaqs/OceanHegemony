@@ -82,6 +82,7 @@ public class UiDlgItemSelect : MonoBehaviour
             package_treasure[i].img.sprite = Resources.Load<Sprite>(treasure.items[i].icon_file);
             package_treasure[i].item = treasure.items[i];
         }
+        MessageManager.GetInstance().Notify("ui_person_skill_update");
     }
 
     void OnUiItemClick(Item param) {

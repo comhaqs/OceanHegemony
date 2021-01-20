@@ -4,6 +4,11 @@ using System.Collections;
 
 public class PersonPlayer : Person
 {
+    public override void Start()
+    {
+        base.Start();
+        MessageManager.GetInstance().Notify("ui_person_skill_update");
+    }
     void OnEnable()
     {
         MessageManager.GetInstance().Add<GameObject>("person_touch_item", OnPersonTouchItem, gameObject);

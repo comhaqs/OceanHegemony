@@ -1,18 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 public class Person : MonoBehaviour
 {
-    public string nm;
+    public string nm { get { return self_name; } set { self_name = value; if (null != text_name) { text_name.text = self_name; } } }
     public int attack = 0;
     public int hp = 100;
     public List<Item> items = new List<Item>(4);
     public int camp = 0;
+    public TextMeshPro text_name;
     [HideInInspector]
     public int power { get { return self_power; } set { self_power = value; } }
 
     protected int self_power = 1000;
+    protected string self_name;
     public virtual void Start()
     {
 
