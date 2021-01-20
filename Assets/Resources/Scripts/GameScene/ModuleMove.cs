@@ -113,37 +113,6 @@ public class ModuleMove : MonoBehaviour
                 x_last = x;
                 y_last = y;
             }
-            /*
-            for (x = x_start + step_x, y = y_start; (x_end > x_start && x <= x_end) || (x_end <= x_start &&  x >= x_end); x += step_x) {
-                if (0 < pools.Count)
-                {
-                    obj = pools[pools.Count - 1];
-                    pools.RemoveAt(pools.Count - 1);
-                    obj.SetActive(true);
-                }
-                else
-                {
-                    obj = Instantiate(path_template);
-                }
-                obj.transform.position = UtilityTool.ToPosition(x, y);
-                paths.Add(obj);
-            }
-            for (x = x_end, y = y_start + step_y; (y_end > y_start && y <= y_end) || (y_end <= y_start && y >= y_end); y += step_y)
-            {
-                if (0 < pools.Count)
-                {
-                    obj = pools[pools.Count - 1];
-                    pools.RemoveAt(pools.Count - 1);
-                    obj.SetActive(true);
-                }
-                else
-                {
-                    obj = Instantiate(path_template);
-                }
-                obj.transform.position = UtilityTool.ToPosition(x, y);
-                paths.Add(obj);
-            }
-            */
             pos_last = pos;
         }
     }
@@ -158,6 +127,7 @@ public class ModuleMove : MonoBehaviour
         }
         flag_move = true;
         MessageManager.GetInstance().Notify("ui_item_search", new List<Item>());
+        MessageManager.GetInstance().Notify("ui_person_search", new List<Person>());
         while (0 < paths.Count) {
             var n = paths[0];
             paths.RemoveAt(0);
@@ -165,13 +135,13 @@ public class ModuleMove : MonoBehaviour
             pools.Add(n);
             var pos = n.transform.position;
             transform.DOMove(pos, 0.5f);
-            yield return new WaitForSeconds(0.5f);
             MessageManager.GetInstance().Notify("map_person_update", gameObject);
             MessageManager.GetInstance().Notify("map_block_update", pos);
+            yield return new WaitForSeconds(0.5f);
             if (0 == paths.Count) {
                 //MessageManager.GetInstance().Notify("map_owner_update", gameObject);
                 MessageManager.GetInstance().Notify("map_item_search", pos);
-                //MessageManager.GetInstance().Notify("map_enemy_search", gameObject);
+                MessageManager.GetInstance().Notify("map_enemy_search", gameObject);
             }
         }
         flag_move = false;

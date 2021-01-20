@@ -7,7 +7,7 @@ public class PersonPlayer : Person
     void OnEnable()
     {
         MessageManager.GetInstance().Add<GameObject>("person_touch_item", OnPersonTouchItem, gameObject);
-        MessageManager.GetInstance().Add<GameObject>("person_touch_enemy", OnPersonTouchEnemy, gameObject);
+        MessageManager.GetInstance().Add<Person>("ui_person_click", OnUiPersonClick, gameObject);
         MessageManager.GetInstance().Add<InfoParam1<Person>>("person_player", OnPersonPlayer, gameObject);
     }
 
@@ -16,9 +16,8 @@ public class PersonPlayer : Person
         MessageManager.GetInstance().Notify("ui_item_select", new InfoParam2<GameObject, GameObject>() { param1 = obj, param2 = gameObject});
     }
 
-    void OnPersonTouchEnemy(GameObject obj)
+    void OnUiPersonClick(Person enemy)
     {
-        var enemy = obj.GetComponent<Person>();
         DoAttack(enemy);
     }
 

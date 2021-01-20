@@ -22,7 +22,7 @@ public class UiListPerson : MonoBehaviour
             {
                 if (null != nodes && index < nodes.Count)
                 {
-                    MessageManager.GetInstance().Notify("ui_person_click", nodes[i]);
+                    MessageManager.GetInstance().Notify("ui_person_click", nodes[index]);
                 }
             });
             touchs[i].img.sprite = Resources.Load<Sprite>("Sprites/person_0");

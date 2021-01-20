@@ -28,6 +28,7 @@ public class ModuleMap : MonoBehaviour
 
     Dictionary<int, InfoBlock> blocks = new Dictionary<int, InfoBlock>();
     Dictionary<int, InfoBlock> nodes = new Dictionary<int, InfoBlock>();
+    static int index_enemy = 0;
     void Start()
     {
         if (1 != (size_x % 2)) {
@@ -326,7 +327,7 @@ public class ModuleMap : MonoBehaviour
                 }
             }
         }
-        MessageManager.GetInstance().Notify("ui_enemy_search", persons);
+        MessageManager.GetInstance().Notify("ui_person_search", persons);
     }
 
     IEnumerator ScaleMap() {
@@ -461,6 +462,7 @@ public class ModuleMap : MonoBehaviour
         var enemy = Instantiate(enemy_template, transform);
         enemy.transform.position = RandomPosition();
         enemy.attack = UnityEngine.Random.Range(10, 20);
+        enemy.nm = string.Format("eny_{0}", index_enemy++);
         var index = ToIndex(enemy.transform.position);
         var info = blocks[index];
         info.nodes.Add(enemy.GetInstanceID(), enemy.gameObject);
