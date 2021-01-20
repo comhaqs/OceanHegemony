@@ -49,6 +49,71 @@ public class ModuleMove : MonoBehaviour
             GameObject obj = null;
             int x = 0;
             int y = 0;
+            int step_count = Mathf.Max(Mathf.Abs(x_end - x_start), Mathf.Abs(y_end - y_start));
+            if (0 == step_count)
+            {
+                return;
+            }
+            float t_x = 1.0f * (x_end - x_start) / step_count;
+            float t_y = 1.0f * (y_end - y_start) / step_count;
+            int x_last = x_start;
+            int y_last = y_start;
+            for (int i = 1; i <= step_count; ++i)
+            {
+                x = Mathf.FloorToInt(x_start + t_x * i);
+                y = Mathf.FloorToInt(y_start + t_y * i);
+                var v = Mathf.Abs(x - x_last) + Mathf.Abs(y - y_last);
+                if (2 == v)
+                {
+                    if (0 < pools.Count)
+                    {
+                        obj = pools[pools.Count - 1];
+                        pools.RemoveAt(pools.Count - 1);
+                        obj.SetActive(true);
+                    }
+                    else
+                    {
+                        obj = Instantiate(path_template);
+                    }
+                    obj.transform.position = UtilityTool.ToPosition(x_last, y);
+                    paths.Add(obj);
+
+                    if (0 < pools.Count)
+                    {
+                        obj = pools[pools.Count - 1];
+                        pools.RemoveAt(pools.Count - 1);
+                        obj.SetActive(true);
+                    }
+                    else
+                    {
+                        obj = Instantiate(path_template);
+                    }
+                    obj.transform.position = UtilityTool.ToPosition(x, y);
+                    paths.Add(obj);
+                }
+                else if (1 == v)
+                {
+                    if (0 < pools.Count)
+                    {
+                        obj = pools[pools.Count - 1];
+                        pools.RemoveAt(pools.Count - 1);
+                        obj.SetActive(true);
+                    }
+                    else
+                    {
+                        obj = Instantiate(path_template);
+                    }
+                    obj.transform.position = UtilityTool.ToPosition(x, y);
+                    paths.Add(obj);
+                }
+                else
+                {
+                    UtilityTool.LogError("位置错误:" + x_last + "," + y_last + " -> " + x + "," + y + " = " + v);
+                }
+                x_last = x;
+                y_last = y;
+            }
+            /*
             for (x = x_start + step_x, y = y_start; (x_end > x_start && x <= x_end) || (x_end <= x_start &&  x >= x_end); x += step_x) {
                 if (0 < pools.Count)
                 {
@@ -78,6 +143,7 @@ public class ModuleMove : MonoBehaviour
                 obj.transform.position = UtilityTool.ToPosition(x, y);
                 paths.Add(obj);
             }
+            */
             pos_last = pos;
         }
     }
@@ -100,7 +166,7 @@ public class ModuleMove : MonoBehaviour
             var pos = n.transform.position;
             transform.DOMove(pos, 0.5f);
             yield return new WaitForSeconds(0.5f);
-            //MessageManager.GetInstance().Notify("map_person_update", gameObject);
+            MessageManager.GetInstance().Notify("map_person_update", gameObject);
             MessageManager.GetInstance().Notify("map_block_update", pos);
             if (0 == paths.Count) {
                 //MessageManager.GetInstance().Notify("map_owner_update", gameObject);

@@ -12,7 +12,7 @@ public class InfoBlock {
     public int H = 0;
     public ModuleBlock block;
     public InfoBlock parent;
-    public List<GameObject> nodes = new List<GameObject>();
+    public Dictionary<int, GameObject> nodes = new Dictionary<int, GameObject>();
     public GameObject owner;
 }
 
@@ -24,6 +24,7 @@ public class ModuleMap : MonoBehaviour
     public GameObject root;
     public MeshFilter mesh_filter;
     public ItemTreasure treasure_template;
+    public PersonEnemy enemy_template;
 
     Dictionary<int, InfoBlock> blocks = new Dictionary<int, InfoBlock>();
     Dictionary<int, InfoBlock> nodes = new Dictionary<int, InfoBlock>();
@@ -41,6 +42,8 @@ public class ModuleMap : MonoBehaviour
         MessageManager.GetInstance().Add<GameObject>("map_owner_update", OnMapOwnerUpdate, gameObject);
         MessageManager.GetInstance().Add<Vector3>("map_item_search", OnMapItemSearch, gameObject);
         MessageManager.GetInstance().Add<GameObject>("map_enemy_search", OnMapEnemySearch, gameObject);
+        MessageManager.GetInstance().Add<InfoParam1<Vector3>>("map_position_random", OnMapPositionRandom, gameObject);
+        MessageManager.GetInstance().Add<InfoParam3<List<Person>, Vector3, int>>("map_person_range", OnMapPersonRange, gameObject);
         StartCoroutine(InitMap());
         
     }
@@ -74,6 +77,7 @@ public class ModuleMap : MonoBehaviour
         }
         StartCoroutine(ScaleMap());
         StartCoroutine(DoTreasure());
+        StartCoroutine(DoEnemy());
     }
 
     int ToIndex(int x, int y) {
@@ -245,23 +249,7 @@ public class ModuleMap : MonoBehaviour
     }
 
     void OnMapPersonUpdate(GameObject obj) {
-        var n = nodes[obj.GetInstanceID()];
-        if (null != n) {
-            for (int i = n.nodes.Count - 1; i >= 0; --i) {
-                if (null == n.nodes[i]) {
-                    n.nodes.RemoveAt(i);
-                    continue;
-                }
-                if (obj == n.nodes[i]) {
-                    n.nodes.RemoveAt(i);
-                    break;
-                }
-            }
-        }
-
-        var info = blocks[ToIndex(obj.transform.position)];
-        info.nodes.Add(obj);
-        nodes[obj.GetInstanceID()] = info;
+        UpdateMapNode(obj);
     }
 
     void OnMapOwnerUpdate(GameObject obj) {
@@ -291,9 +279,10 @@ public class ModuleMap : MonoBehaviour
                     && Mathf.FloorToInt(-size_y / 2) <= j && j <= Mathf.FloorToInt(size_y / 2))
                 {
                     var info_check = blocks[ToIndex(i, j)];
-                    for (int m = info_check.nodes.Count - 1; m >= 0; --m) {
+                    foreach (var m in info_check.nodes.Keys) {
                         if (null == info_check.nodes[m]) {
-                            info_check.nodes.RemoveAt(m);
+                            info_check.nodes.Remove(m);
+                            nodes.Remove(m);
                             continue;
                         }
                         var item = info_check.nodes[m].GetComponent<Item>();
@@ -320,11 +309,12 @@ public class ModuleMap : MonoBehaviour
                     && Mathf.FloorToInt(-size_y / 2) <= j && j <= Mathf.FloorToInt(size_y / 2))
                 {
                     var info_check = blocks[ToIndex(i, j)];
-                    for (int m = info_check.nodes.Count - 1; m >= 0; --m)
+                    foreach (var m in info_check.nodes.Keys)
                     {
                         if (null == info_check.nodes[m])
                         {
-                            info_check.nodes.RemoveAt(m);
+                            info_check.nodes.Remove(m);
+                            nodes.Remove(m);
                             continue;
                         }
                         var person = info_check.nodes[m].GetComponent<Person>();
@@ -406,13 +396,16 @@ public class ModuleMap : MonoBehaviour
                         }
                     }
                     foreach (var kv in list_blocks) {
-                        for (int k = kv.Value.nodes.Count - 1; k >= 0; --k) {
+                        foreach (var k in kv.Value.nodes.Keys) {
                             if (null == kv.Value.nodes[k]) {
-                                kv.Value.nodes.RemoveAt(k);
+                                kv.Value.nodes.Remove(k);
+                                nodes.Remove(k);
                                 continue;
                             }
                             var person = kv.Value.nodes[k].GetComponent<Person>();
-                            person.hp -= 2;
+                            if (null != person) {
+                                person.hp -= 2;
+                            }
                         }
                     }
                     yield return new WaitForSeconds(time_action);
@@ -441,11 +434,88 @@ public class ModuleMap : MonoBehaviour
         treasure.transform.position = RandomPosition();
         var index = ToIndex(treasure.transform.position);
         var info = blocks[index];
-        info.nodes.Add(treasure.gameObject);
+        info.nodes.Add(treasure.GetInstanceID(), treasure.gameObject);
+        nodes[treasure.GetInstanceID()] = info;
     }
 
     Vector3 RandomPosition() {
         return UtilityTool.ToPosition(UnityEngine.Random.Range(-Mathf.FloorToInt(size_x / 2), Mathf.FloorToInt(size_x / 2))
             , UnityEngine.Random.Range(-Mathf.FloorToInt(size_y / 2), Mathf.FloorToInt(size_y / 2)));
+    }
+
+    void OnMapPositionRandom(InfoParam1<Vector3> param) {
+        param.param1 = RandomPosition();
+    }
+
+    IEnumerator DoEnemy() {
+        for (int i = 0; i < 15; ++i) {
+            AddEnemy();
+        }
+        while (true) {
+            yield return new WaitForSeconds(10.0f);
+            AddEnemy();
+        }
+    }
+
+    void AddEnemy() {
+        var enemy = Instantiate(enemy_template, transform);
+        enemy.transform.position = RandomPosition();
+        enemy.attack = UnityEngine.Random.Range(10, 20);
+        var index = ToIndex(enemy.transform.position);
+        var info = blocks[index];
+        info.nodes.Add(enemy.GetInstanceID(), enemy.gameObject);
+        nodes[enemy.GetInstanceID()] = info;
+    }
+
+    void OnMapPersonRange(InfoParam3<List<Person>, Vector3, int> param) {
+        param.param1 = new List<Person>();
+        int x = UtilityTool.ToIndexXY(param.param2.x);
+        int y = UtilityTool.ToIndexXY(param.param2.y);
+        int step = Mathf.FloorToInt(param.param3 / 2);
+        for (int i = x - step; i <= x + step; ++i) {
+            for (int j = y - step; j <= y + step; ++j) {
+                if (Mathf.FloorToInt(-size_x / 2) <= i && Mathf.FloorToInt(size_x / 2) >= i
+                    && Mathf.FloorToInt(-size_y / 2) <= j && Mathf.FloorToInt(size_y / 2) >= j) {
+                    var info = blocks[ToIndex(i, j)];
+                    foreach (var k in info.nodes.Keys) {
+                        if (null == info.nodes[k]) {
+                            info.nodes.Remove(k);
+                            nodes.Remove(k);
+                            continue;
+                        }
+                        var person = info.nodes[k].GetComponent<Person>();
+                        if (null != person) {
+                            param.param1.Add(person);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void UpdateMapNode(GameObject obj)
+    {
+        InfoBlock info = null;
+        if (nodes.TryGetValue(obj.GetInstanceID(), out info)) {
+            foreach (var k in info.nodes.Keys)
+            {
+                if (null == info.nodes[k])
+                {
+                    info.nodes.Remove(k);
+                    nodes.Remove(k);
+                    continue;
+                }
+                if (obj == info.nodes[k])
+                {
+                    info.nodes.Remove(k);
+                    nodes.Remove(k);
+                    break;
+                }
+            }
+        }
+
+        info = blocks[ToIndex(obj.transform.position)];
+        info.nodes.Add(obj.GetInstanceID(), obj);
+        nodes[obj.GetInstanceID()] = info;
     }
 }

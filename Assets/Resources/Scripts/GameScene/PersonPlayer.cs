@@ -19,18 +19,7 @@ public class PersonPlayer : Person
     void OnPersonTouchEnemy(GameObject obj)
     {
         var enemy = obj.GetComponent<Person>();
-        var direction = UtilityTool.ToDirection(enemy.transform.position - transform.position);
-        if (UtilityTool.Direction.DIRECTION_FORWARD == direction)
-        {
-            enemy.hp -= attack;
-        }
-        else if (UtilityTool.Direction.DIRECTION_LEFT == direction || UtilityTool.Direction.DIRECTION_RIGHT == direction)
-        {
-            enemy.hp -= (int)(0.7f * attack);
-        }
-        else {
-
-        }
+        DoAttack(enemy);
     }
 
     void OnPersonPlayer(InfoParam1<Person> param) {
