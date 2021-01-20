@@ -39,11 +39,10 @@ public class ModuleMap : MonoBehaviour
         MessageManager.GetInstance().Add<Vector3>("map_block_update", OnMapBlockUpdate, gameObject);
         MessageManager.GetInstance().Add<GameObject>("map_person_update", OnMapPersonUpdate, gameObject);
         MessageManager.GetInstance().Add<GameObject>("map_owner_update", OnMapOwnerUpdate, gameObject);
-        MessageManager.GetInstance().Add<GameObject>("map_item_search", OnMapItemSearch, gameObject);
+        MessageManager.GetInstance().Add<Vector3>("map_item_search", OnMapItemSearch, gameObject);
         MessageManager.GetInstance().Add<GameObject>("map_enemy_search", OnMapEnemySearch, gameObject);
         StartCoroutine(InitMap());
-        StartCoroutine(ScaleMap());
-        StartCoroutine(DoTreasure());
+        
     }
 
     IEnumerator InitMap()
@@ -73,6 +72,8 @@ public class ModuleMap : MonoBehaviour
                 }
             }
         }
+        StartCoroutine(ScaleMap());
+        StartCoroutine(DoTreasure());
     }
 
     int ToIndex(int x, int y) {
@@ -81,8 +82,8 @@ public class ModuleMap : MonoBehaviour
     
 
     int ToIndex(Vector3 pos) {
-        int x = Mathf.FloorToInt(pos.x / UtilityTool.block_size);
-        int y = Mathf.FloorToInt(pos.y / UtilityTool.block_size);
+        int x = UtilityTool.ToIndexXY(pos.x);
+        int y = UtilityTool.ToIndexXY(pos.y);
         return ToIndex(x, y);
     }
 
@@ -278,15 +279,16 @@ public class ModuleMap : MonoBehaviour
         }
     }
 
-    void OnMapItemSearch(GameObject obj)
+    void OnMapItemSearch(Vector3 pos)
     {
         var items = new List<Item>();
-        var info = blocks[ToIndex(obj.transform.position)];
+        var info = blocks[ToIndex(pos)];
         for (int i = info.x - 1; i <= info.x + 1; ++i)
         {
-            for (int j = info.y - 1; j <= info.y + 1; ++i)
+            for (int j = info.y - 1; j <= info.y + 1; ++j)
             {
-                if (0 <= i && i < size_x && 0 <= j && j < size_y)
+                if (Mathf.FloorToInt(-size_x/2) <= i && i <= Mathf.FloorToInt(size_x / 2) 
+                    && Mathf.FloorToInt(-size_y / 2) <= j && j <= Mathf.FloorToInt(size_y / 2))
                 {
                     var info_check = blocks[ToIndex(i, j)];
                     for (int m = info_check.nodes.Count - 1; m >= 0; --m) {
@@ -312,9 +314,10 @@ public class ModuleMap : MonoBehaviour
         var info = blocks[ToIndex(obj.transform.position)];
         for (int i = info.x - 1; i <= info.x + 1; ++i)
         {
-            for (int j = info.y - 1; j <= info.y + 1; ++i)
+            for (int j = info.y - 1; j <= info.y + 1; ++j)
             {
-                if (0 <= i && i < size_x && 0 <= j && j < size_y)
+                if (Mathf.FloorToInt(-size_x / 2) <= i && i <= Mathf.FloorToInt(size_x / 2)
+                    && Mathf.FloorToInt(-size_y / 2) <= j && j <= Mathf.FloorToInt(size_y / 2))
                 {
                     var info_check = blocks[ToIndex(i, j)];
                     for (int m = info_check.nodes.Count - 1; m >= 0; --m)

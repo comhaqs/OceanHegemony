@@ -13,7 +13,7 @@ public class UiDlgItemSelect : MonoBehaviour
 
     private void OnEnable()
     {
-        MessageManager.GetInstance().Add<Item>("ui_item_select", OnUiItemSelect, gameObject);
+        MessageManager.GetInstance().Add<Item>("ui_item_click", OnUiItemClick, gameObject);
     }
 
     void Start()
@@ -37,7 +37,7 @@ public class UiDlgItemSelect : MonoBehaviour
         }
         for (int i = 0; i < package_treasure.Count; ++i)
         {
-            var select_package = package_person[i];
+            var select_package = package_treasure[i];
             select_package.bt.onClick.AddListener(() => {
                 if (null == treasure || null == person)
                 {
@@ -84,7 +84,7 @@ public class UiDlgItemSelect : MonoBehaviour
         }
     }
 
-    void OnUiItemSelect(Item param) {
+    void OnUiItemClick(Item param) {
         var info_treasure = param.GetComponent<ItemTreasure>();
         if (null == info_treasure)
         {

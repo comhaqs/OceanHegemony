@@ -50,4 +50,9 @@ public class UtilityTool
     {
         return new Vector3(UtilityTool.block_size * x, UtilityTool.block_size * y, 0.0f);
     }
+
+    public static int ToIndexXY(float d)
+    {
+        return Mathf.FloorToInt((d + 0.5f * block_size) / block_size);
+    }
 }

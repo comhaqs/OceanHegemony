@@ -40,10 +40,10 @@ public class ModuleMove : MonoBehaviour
             if (0 == paths.Count) {
                 pos_last = transform.position;
             }
-            int x_start = Mathf.FloorToInt(pos_last.x / UtilityTool.block_size);
-            int y_start = Mathf.FloorToInt(pos_last.y / UtilityTool.block_size);
-            int x_end = Mathf.FloorToInt(pos.x / UtilityTool.block_size);
-            int y_end = Mathf.FloorToInt(pos.y / UtilityTool.block_size);
+            int x_start = UtilityTool.ToIndexXY(pos_last.x);
+            int y_start = UtilityTool.ToIndexXY(pos_last.y);
+            int x_end = UtilityTool.ToIndexXY(pos.x);
+            int y_end = UtilityTool.ToIndexXY(pos.y);
             int step_x = x_end > x_start ? 1 : -1;
             int step_y = y_end > y_start ? 1 : -1;
             GameObject obj = null;
@@ -87,7 +87,11 @@ public class ModuleMove : MonoBehaviour
         StartCoroutine(MoveToPosition());
     }
     IEnumerator MoveToPosition() {
+        if (0 == paths.Count) {
+            yield break;
+        }
         flag_move = true;
+        MessageManager.GetInstance().Notify("ui_item_search", new List<Item>());
         while (0 < paths.Count) {
             var n = paths[0];
             paths.RemoveAt(0);
@@ -96,13 +100,12 @@ public class ModuleMove : MonoBehaviour
             var pos = n.transform.position;
             transform.DOMove(pos, 0.5f);
             yield return new WaitForSeconds(0.5f);
-            //MessageManager.GetInstance().Notify("map_person_update", pos);
-            //MessageManager.GetInstance().Notify("map_block_update", pos);
-
+            //MessageManager.GetInstance().Notify("map_person_update", gameObject);
+            MessageManager.GetInstance().Notify("map_block_update", pos);
             if (0 == paths.Count) {
-                //MessageManager.GetInstance().Notify("map_owner_update", pos);
+                //MessageManager.GetInstance().Notify("map_owner_update", gameObject);
                 MessageManager.GetInstance().Notify("map_item_search", pos);
-                //MessageManager.GetInstance().Notify("map_enemy_search", pos);
+                //MessageManager.GetInstance().Notify("map_enemy_search", gameObject);
             }
         }
         flag_move = false;

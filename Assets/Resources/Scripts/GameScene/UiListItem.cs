@@ -21,7 +21,7 @@ public class UiListItem : MonoBehaviour
             {
                 if (null != nodes && index < nodes.Count)
                 {
-                    MessageManager.GetInstance().Notify("ui_item_click", nodes[i]);
+                    MessageManager.GetInstance().Notify("ui_item_click", nodes[index]);
                 }
             });
             touchs[i].gameObject.SetActive(false);

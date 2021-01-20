@@ -95,7 +95,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3d39f73306afdc41bab525bf67b859c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  icon_file: 
+  icon_file: Sprites/item_treasure
   item_templates:
   - {fileID: 4091448662782550101, guid: 73e5e929bf66ec64f9b87c604c646334, type: 3}
   - {fileID: 9176403001052732071, guid: 31e69e111230451428b656b9118d9827, type: 3}
