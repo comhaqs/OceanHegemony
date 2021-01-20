@@ -101,7 +101,7 @@ public class ModuleMove : MonoBehaviour
 
             if (0 == paths.Count) {
                 //MessageManager.GetInstance().Notify("map_owner_update", pos);
-                //MessageManager.GetInstance().Notify("map_item_search", pos);
+                MessageManager.GetInstance().Notify("map_item_search", pos);
                 //MessageManager.GetInstance().Notify("map_enemy_search", pos);
             }
         }

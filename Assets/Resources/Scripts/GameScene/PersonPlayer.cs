@@ -4,10 +4,11 @@ using System.Collections;
 
 public class PersonPlayer : Person
 {
-    public override void Start()
+    void OnEnable()
     {
         MessageManager.GetInstance().Add<GameObject>("person_touch_item", OnPersonTouchItem, gameObject);
         MessageManager.GetInstance().Add<GameObject>("person_touch_enemy", OnPersonTouchEnemy, gameObject);
+        MessageManager.GetInstance().Add<InfoParam1<Person>>("person_player", OnPersonPlayer, gameObject);
     }
 
     void OnPersonTouchItem(GameObject obj)
@@ -30,5 +31,9 @@ public class PersonPlayer : Person
         else {
 
         }
+    }
+
+    void OnPersonPlayer(InfoParam1<Person> param) {
+        param.param1 = this;
     }
 }

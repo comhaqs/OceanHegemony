@@ -5,43 +5,39 @@ using System.Collections.Generic;
 
 public class UiListItem : MonoBehaviour
 {
-    public string msg_update;
-    public List<GameObject> touchs;
-    public string msg_click;
+    public List<UiTouch> touchs;
 
     List<Item> nodes;
+    private void OnEnable()
+    {
+        MessageManager.GetInstance().Add<List<Item>>("ui_item_search", OnUiItemSearch, gameObject);
+    }
     public virtual void Start()
     {
-        for (int i = 0; i < nodes.Count; ++i)
+        for (int i = 0; i < touchs.Count; ++i)
         {
             var index = i;
-            touchs[i].GetComponent<Button>().onClick.AddListener(() =>
+            touchs[i].bt.onClick.AddListener(() =>
             {
                 if (null != nodes && index < nodes.Count)
                 {
-                    MessageManager.GetInstance().Notify(msg_click, nodes[i]);
+                    MessageManager.GetInstance().Notify("ui_item_click", nodes[i]);
                 }
             });
+            touchs[i].gameObject.SetActive(false);
         }
-        MessageManager.GetInstance().Add<List<Item>>(msg_update, OnNodeUpdate, gameObject);
     }
 
-    void OnNodeUpdate(List<Item> ps)
+    void OnUiItemSearch(List<Item> ps)
     {
         nodes = ps;
         foreach (var b in touchs)
         {
             b.gameObject.SetActive(false);
         }
-        for (int i = 0; i < ps.Count && i < touchs.Count; ++i)
-        {
+        for (int i = 0; i < nodes.Count && i < touchs.Count; ++i) {
             touchs[i].gameObject.SetActive(true);
-            SetNode(ps[i], touchs[i]);
+            touchs[i].img.sprite = Resources.Load<Sprite>(nodes[i].icon_file);
         }
-
-    }
-    public virtual void SetNode(Item d, GameObject b)
-    {
-        b.GetComponent<Image>().sprite = d.GetComponent<SpriteRenderer>().sprite;
     }
 }

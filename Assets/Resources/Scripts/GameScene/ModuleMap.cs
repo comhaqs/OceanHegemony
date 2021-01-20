@@ -22,8 +22,8 @@ public class ModuleMap : MonoBehaviour
     public int size_y = 101;
     public ModuleBlock block_template;
     public GameObject root;
-
     public MeshFilter mesh_filter;
+    public ItemTreasure treasure_template;
 
     Dictionary<int, InfoBlock> blocks = new Dictionary<int, InfoBlock>();
     Dictionary<int, InfoBlock> nodes = new Dictionary<int, InfoBlock>();
@@ -43,6 +43,7 @@ public class ModuleMap : MonoBehaviour
         MessageManager.GetInstance().Add<GameObject>("map_enemy_search", OnMapEnemySearch, gameObject);
         StartCoroutine(InitMap());
         StartCoroutine(ScaleMap());
+        StartCoroutine(DoTreasure());
     }
 
     IEnumerator InitMap()
@@ -420,5 +421,28 @@ public class ModuleMap : MonoBehaviour
             }
             rect_old = rect_new;
         }
+    }
+
+    IEnumerator DoTreasure() {
+        for (int i = 0; i < 100; ++i) {
+            AddTreasure();
+        }
+        while (true) {
+            yield return new WaitForSeconds(5.0f);
+            AddTreasure();
+        }
+    }
+
+    void AddTreasure() {
+        var treasure = Instantiate(treasure_template, transform);
+        treasure.transform.position = RandomPosition();
+        var index = ToIndex(treasure.transform.position);
+        var info = blocks[index];
+        info.nodes.Add(treasure.gameObject);
+    }
+
+    Vector3 RandomPosition() {
+        return UtilityTool.ToPosition(UnityEngine.Random.Range(-Mathf.FloorToInt(size_x / 2), Mathf.FloorToInt(size_x / 2))
+            , UnityEngine.Random.Range(-Mathf.FloorToInt(size_y / 2), Mathf.FloorToInt(size_y / 2)));
     }
 }

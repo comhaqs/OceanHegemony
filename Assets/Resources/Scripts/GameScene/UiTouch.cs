@@ -7,4 +7,5 @@ public class UiTouch : MonoBehaviour
     public Button bt;
     public Image img;
     public Text nm;
+    public Item item;
 }
