@@ -28,6 +28,7 @@ public class ModuleMap : MonoBehaviour
 
     Dictionary<int, InfoBlock> blocks = new Dictionary<int, InfoBlock>();
     Dictionary<int, InfoBlock> nodes = new Dictionary<int, InfoBlock>();
+    RectInt rect_current;
     static int index_enemy = 0;
     void Start()
     {
@@ -339,6 +340,8 @@ public class ModuleMap : MonoBehaviour
         RectInt rect_origin = new RectInt(block_left_bottton.x, block_left_bottton.y, block_top_right.x - block_left_bottton.x, block_top_right.y - block_left_bottton.y);
         RectInt rect_old = new RectInt(rect_origin.x, rect_origin.y, rect_origin.width, rect_origin.height);
         RectInt rect_new = new RectInt(rect_old.x, rect_old.y, rect_old.width, rect_old.height);
+        rect_current = new RectInt(rect_new.x, rect_new.y, rect_new.width, rect_new.height);
+        StartCoroutine(EffectScaleMap());
         while (true) {
             yield return new WaitForSeconds(10.0f);
             if (!mesh_filter.gameObject.activeSelf) {
@@ -364,18 +367,18 @@ public class ModuleMap : MonoBehaviour
             int count_step = 12;
             for (int i = 1; i <= count_step; ++i) {
                 var points = new List<Vector3>();
-                int x = rect_old.x + Mathf.FloorToInt((rect_new.x - rect_old.x) * i / count_step);
-                int y = rect_old.y + Mathf.FloorToInt((rect_new.y - rect_old.y) * i / count_step);
-                int width = rect_old.width + Mathf.FloorToInt((rect_new.width - rect_old.width) * i / count_step);
-                int height = rect_old.height + Mathf.FloorToInt((rect_new.height - rect_old.height) * i / count_step);
+                rect_current.x = rect_old.x + Mathf.FloorToInt((rect_new.x - rect_old.x) * i / count_step);
+                rect_current.y = rect_old.y + Mathf.FloorToInt((rect_new.y - rect_old.y) * i / count_step);
+                rect_current.width = rect_old.width + Mathf.FloorToInt((rect_new.width - rect_old.width) * i / count_step);
+                rect_current.height = rect_old.height + Mathf.FloorToInt((rect_new.height - rect_old.height) * i / count_step);
                 points.Add(UtilityTool.ToPosition(rect_origin.x, rect_origin.y) + 0.5f * new Vector3(-UtilityTool.block_size, -UtilityTool.block_size, 0.0f));
                 points.Add(UtilityTool.ToPosition(rect_origin.x, rect_origin.y + rect_origin.height) + 0.5f * new Vector3(-UtilityTool.block_size, UtilityTool.block_size, 0.0f));
                 points.Add(UtilityTool.ToPosition(rect_origin.x + rect_origin.width, rect_origin.y + rect_origin.height) + 0.5f * new Vector3(UtilityTool.block_size, UtilityTool.block_size, 0.0f));
                 points.Add(UtilityTool.ToPosition(rect_origin.x + rect_origin.width, rect_origin.y) + 0.5f * new Vector3(UtilityTool.block_size, -UtilityTool.block_size, 0.0f));
-                points.Add(UtilityTool.ToPosition(x, y) + 0.5f * new Vector3(-UtilityTool.block_size, -UtilityTool.block_size, 0.0f));
-                points.Add(UtilityTool.ToPosition(x, y + height) + 0.5f * new Vector3(-UtilityTool.block_size, UtilityTool.block_size, 0.0f));
-                points.Add(UtilityTool.ToPosition(x + width, y +height) + 0.5f * new Vector3(UtilityTool.block_size, UtilityTool.block_size, 0.0f));
-                points.Add(UtilityTool.ToPosition(x + width, y) + 0.5f * new Vector3(UtilityTool.block_size, -UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(rect_current.x, rect_current.y) + 0.5f * new Vector3(-UtilityTool.block_size, -UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(rect_current.x, rect_current.y + rect_current.height) + 0.5f * new Vector3(-UtilityTool.block_size, UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(rect_current.x + rect_current.width, rect_current.y + rect_current.height) + 0.5f * new Vector3(UtilityTool.block_size, UtilityTool.block_size, 0.0f));
+                points.Add(UtilityTool.ToPosition(rect_current.x + rect_current.width, rect_current.y) + 0.5f * new Vector3(UtilityTool.block_size, -UtilityTool.block_size, 0.0f));
                 Mesh mesh = new Mesh();
                 mesh.vertices = points.ToArray();
                 var triangles = new List<int>() { 0,1,5, 5,4,0, 1,2,6, 6,5,1, 2,3,7, 7,6,2, 3,0,4, 4,7,3};
@@ -383,40 +386,48 @@ public class ModuleMap : MonoBehaviour
                 mesh.RecalculateBounds();
                 mesh.RecalculateNormals();
                 mesh_filter.mesh = mesh;
-
-                int time_action = Mathf.FloorToInt(12.0f / count_step);
-                for (int j = 0; j < time_action; ++j) {
-                    var list_blocks = new Dictionary<int, InfoBlock>();
-                    foreach (var kv in nodes) {
-                        if (list_blocks.ContainsKey(kv.Value.index)) {
-                            continue;
-                        }
-                        if (kv.Value.x <= rect_new.x || kv.Value.x >= rect_new.x + rect_new.width
-                            || kv.Value.y <= rect_new.y || kv.Value.y >= rect_new.y + rect_new.height) {
-                            list_blocks.Add(kv.Value.index, kv.Value);
-                        }
-                    }
-                    foreach (var kv in list_blocks) {
-                        foreach (var k in kv.Value.nodes.Keys) {
-                            if (null == kv.Value.nodes[k]) {
-                                kv.Value.nodes.Remove(k);
-                                nodes.Remove(k);
-                                continue;
-                            }
-                            var person = kv.Value.nodes[k].GetComponent<Person>();
-                            if (null != person) {
-                                person.hp -= 2;
-                            }
-                        }
-                    }
-                    yield return new WaitForSeconds(time_action);
-                }
-                
+                yield return new WaitForSeconds(12.0f / count_step);
             }
             if (0 == rect_new.width || 0 >= rect_new.height) {
                 yield break;
             }
             rect_old = rect_new;
+        }
+    }
+
+    IEnumerator EffectScaleMap() {
+        while (0 < rect_current.width && 0 < rect_current.height) {
+            yield return new WaitForSeconds(1.0f);
+            var list_blocks = new Dictionary<int, InfoBlock>();
+            foreach (var kv in nodes)
+            {
+                if (list_blocks.ContainsKey(kv.Value.index))
+                {
+                    continue;
+                }
+                if (kv.Value.x <= rect_current.x || kv.Value.x >= rect_current.x + rect_current.width
+                    || kv.Value.y <= rect_current.y || kv.Value.y >= rect_current.y + rect_current.height)
+                {
+                    list_blocks.Add(kv.Value.index, kv.Value);
+                }
+            }
+            foreach (var kv in list_blocks)
+            {
+                foreach (var k in kv.Value.nodes.Keys)
+                {
+                    if (null == kv.Value.nodes[k])
+                    {
+                        kv.Value.nodes.Remove(k);
+                        nodes.Remove(k);
+                        continue;
+                    }
+                    var person = kv.Value.nodes[k].GetComponent<Person>();
+                    if (null != person)
+                    {
+                        person.hp -= 2;
+                    }
+                }
+            }
         }
     }
 
