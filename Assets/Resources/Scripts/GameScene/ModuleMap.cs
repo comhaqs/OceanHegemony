@@ -47,6 +47,7 @@ public class ModuleMap : MonoBehaviour
         MessageManager.GetInstance().Add<InfoParam1<Vector3>>("map_position_random", OnMapPositionRandom, gameObject);
         MessageManager.GetInstance().Add<InfoParam3<List<Person>, Vector3, int>>("map_person_range", OnMapPersonRange, gameObject);
         MessageManager.GetInstance().Add<GameObject>("map_node_update", OnMapNodeUpdate, gameObject);
+        MessageManager.GetInstance().Add<InfoParam1<List<ModulePath>>>("map_path_info", OnMapPathInfo, gameObject);
     }
     void Start()
     {
@@ -161,7 +162,7 @@ public class ModuleMap : MonoBehaviour
                 }
                 else {
                     var info_check = new InfoBlock() { index = d.index, x = d.x, y = d.y, block = d.block, parent = info_current };
-                    info_check.G = info_current.G + info_check.block.weigtht;
+                    info_check.G = info_current.G + info_check.block.weight;
                     info_check.H = Mathf.Abs(info_end.x - d.x) + Mathf.Abs(info_end.y - d.y);
                     info_check.F = info_check.G + info_check.H;
                     var info_open = list_open[info_check.index];
@@ -215,7 +216,7 @@ public class ModuleMap : MonoBehaviour
                 else
                 {
                     var info_check = new InfoBlock() { index = d.index, x = d.x, y = d.y, block = d.block, parent = info_current };
-                    info_check.G = info_current.G + info_check.block.weigtht;
+                    info_check.G = info_current.G + info_check.block.weight;
                     info_check.H = 0;
                     info_check.F = info_check.G + info_check.H;
                     var info_open = list_open[info_check.index];
@@ -444,5 +445,12 @@ public class ModuleMap : MonoBehaviour
 
     void OnMapNodeUpdate(GameObject node) {
         nodes[node.GetInstanceID()] = node;
+    }
+
+    void OnMapPathInfo(InfoParam1<List<ModulePath>> param) {
+        foreach (var p in param.param1) {
+            var index = ToIndex(p.transform.position);
+            p.weight = blocks[index].block.weight;
+        }
     }
 }

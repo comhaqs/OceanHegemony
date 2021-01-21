@@ -2,40 +2,23 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public enum PathType {
+    PATH_ALLOW,
+    PATH_FORBID
+}
 public class ModulePath : MonoBehaviour
 {
-    public GameObject path_template;
+    public PathType type { get { return self_type; }  set { self_type = value; OnTypeChange(); } }
+    public int weight = 0;
 
-    List<GameObject> nodes = new List<GameObject>();
-    List<GameObject> pools = new List<GameObject>();
-    void Start()
-    {
-
-    }
-    void OnPersonPath(List<Vector3> paths)
-    {
-        foreach (var n in nodes)
-        {
-            n.SetActive(false);
-            pools.Add(n);
+    PathType self_type = PathType.PATH_FORBID;
+    void OnTypeChange() {
+        string file = "";
+        if (PathType.PATH_ALLOW == self_type) {
+            file = "Sprites/path_allow";
+        } else if (PathType.PATH_FORBID == self_type) {
+            file = "Sprites/path_forbit";
         }
-        nodes.Clear();
-        if (0 < paths.Count)
-        {
-            GameObject obj = null;
-            foreach (var p  in paths) {
-                if (0 == pools.Count)
-                {
-                    obj = Instantiate(path_template, transform);
-                }
-                else {
-                    obj = pools[0];
-                    pools.RemoveAt(0);
-                    obj.SetActive(true);
-                    nodes.Add(obj);
-                }
-                obj.transform.position = p;
-            }
-        }
+        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(file);
     }
 }

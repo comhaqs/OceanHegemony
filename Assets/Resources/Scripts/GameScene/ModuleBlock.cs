@@ -25,7 +25,7 @@ public class ModuleBlock : MonoBehaviour
             }
         } }
 
-    public int weigtht { get { return sweights[(int)(type)]; } }
+    public int weight { get { return sweights[(int)(type)]; } }
 
     static List<Sprite> ssprites;
     static List<int> sweights;

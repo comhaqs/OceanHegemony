@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 3273957159812384677}
   - component: {fileID: 3273957159812384678}
   - component: {fileID: 3273957159812384675}
-  - component: {fileID: 3273957159812384676}
   - component: {fileID: 7674369545493844454}
   m_Layer: 0
   m_Name: Player
@@ -99,9 +98,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attack: 15
+  mp: 100
   items: []
   camp: 1
   text_name: {fileID: 0}
+  hp_max: 100
+  mp_max: 100
+  mp_speed: 5
+  path_template: {fileID: 3780703391109575432, guid: ba7491e2376020448953eb0e613fef51, type: 3}
 --- !u!114 &3273957159812384675
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -115,19 +119,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   offset: {x: 0, y: 0, z: 0}
---- !u!114 &3273957159812384676
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3273957159812384680}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 130bf1fc19e07944f87f4a5cb8d8c966, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  path_template: {fileID: 7354815126483103749, guid: a6467cfd7027adc47b3a541fd3cc0f7c, type: 3}
 --- !u!114 &7674369545493844454
 MonoBehaviour:
   m_ObjectHideFlags: 0
