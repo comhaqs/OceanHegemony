@@ -139,11 +139,11 @@ public class ModuleMove : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
             if (0 == paths.Count) {
                 //MessageManager.GetInstance().Notify("map_owner_update", gameObject);
-                var param = new InfoParam3<List<Person>, Vector3, int>() { param2 = transform.position, param3 = 1 };
-                MessageManager.GetInstance().Notify("map_item_search", param);
-                MessageManager.GetInstance().Notify("ui_item_search", param.param1);
+                var param_item = new InfoParam3<List<Item>, Vector3, int>() { param2 = transform.position, param3 = 1 };
+                MessageManager.GetInstance().Notify("map_item_search", param_item);
+                MessageManager.GetInstance().Notify("ui_item_search", param_item.param1);
 
-                param = new InfoParam3<List<Person>, Vector3, int>() { param2 = transform.position, param3 = 2 };
+                var param = new InfoParam3<List<Person>, Vector3, int>() { param2 = transform.position, param3 = 2 };
                 MessageManager.GetInstance().Notify("map_person_range", param);
                 var enemys = new List<Person>();
                 var self = GetComponent<Person>();

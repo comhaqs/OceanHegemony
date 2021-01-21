@@ -271,7 +271,6 @@ public class ModuleMap : MonoBehaviour
     void OnMapItemSearch(InfoParam3<List<Item>, Vector3, int> param)
     {
         param.param1 = new List<Item>();
-        var items = new List<Item>();
         foreach (var k  in nodes.Keys) {
             var node = nodes[k];
             if (null == node) {
@@ -282,7 +281,7 @@ public class ModuleMap : MonoBehaviour
                 var item = node.GetComponent<Item>();
                 if (null != item)
                 {
-                    items.Add(item);
+                    param.param1.Add(item);
                 }
             }
         }

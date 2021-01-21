@@ -20,7 +20,12 @@ public class UiListSkill : MonoBehaviour
             {
                 if (null != nodes && index < nodes.Count)
                 {
-                    MessageManager.GetInstance().Notify("ui_person_skill_click", nodes[index]);
+                    var skill = nodes[index].GetComponent<ItemSkill>();
+                    nodes.RemoveAt(index);
+                    UpdateUi();
+                    if (null != skill) {
+                        skill.OnAction();
+                    }
                 }
             });
             touchs[i].gameObject.SetActive(false);
@@ -35,6 +40,10 @@ public class UiListSkill : MonoBehaviour
             return;
         }
         nodes = param.param1.items;
+        UpdateUi();
+    }
+
+    void UpdateUi() {
         foreach (var b in touchs)
         {
             b.gameObject.SetActive(false);
