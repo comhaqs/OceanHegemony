@@ -12,10 +12,11 @@ public class UiListAction : MonoBehaviour
 
         move.onClick.AddListener(()=> {
             MessageManager.GetInstance().Notify("action_move");
+            OnActionMoveUpdate(false);
         });
     }
 
     void OnActionMoveUpdate(bool flag) {
-        move.gameObject.SetActive(flag);
+        move.interactable = flag;
     }
 }
