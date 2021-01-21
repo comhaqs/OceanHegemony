@@ -12,7 +12,6 @@ public class InfoBlock {
     public int H = 0;
     public ModuleBlock block;
     public InfoBlock parent;
-    public Dictionary<int, GameObject> nodes = new Dictionary<int, GameObject>();
     public GameObject owner;
 }
 
@@ -27,27 +26,31 @@ public class ModuleMap : MonoBehaviour
     public PersonEnemy enemy_template;
 
     Dictionary<int, InfoBlock> blocks = new Dictionary<int, InfoBlock>();
-    Dictionary<int, InfoBlock> nodes = new Dictionary<int, InfoBlock>();
+    Dictionary<int, GameObject> nodes = new Dictionary<int, GameObject>();
     RectInt rect_current;
     static int index_enemy = 0;
-    void Start()
+
+    private void OnEnable()
     {
-        if (1 != (size_x % 2)) {
+        if (1 != (size_x % 2))
+        {
             size_x += 1;
         }
-        if (1 != (size_y % 2)) {
+        if (1 != (size_y % 2))
+        {
             size_y += 1;
         }
         MessageManager.GetInstance().Add<InfoParam3<List<Vector3>, Vector3, Vector3>>("map_find_path", OnMapFindPath, gameObject);
         MessageManager.GetInstance().Add<Vector3>("map_block_update", OnMapBlockUpdate, gameObject);
-        MessageManager.GetInstance().Add<GameObject>("map_person_update", OnMapPersonUpdate, gameObject);
         MessageManager.GetInstance().Add<GameObject>("map_owner_update", OnMapOwnerUpdate, gameObject);
         MessageManager.GetInstance().Add<Vector3>("map_item_search", OnMapItemSearch, gameObject);
-        MessageManager.GetInstance().Add<GameObject>("map_enemy_search", OnMapEnemySearch, gameObject);
         MessageManager.GetInstance().Add<InfoParam1<Vector3>>("map_position_random", OnMapPositionRandom, gameObject);
         MessageManager.GetInstance().Add<InfoParam3<List<Person>, Vector3, int>>("map_person_range", OnMapPersonRange, gameObject);
+        MessageManager.GetInstance().Add<GameObject>("map_node_update", OnMapNodeUpdate, gameObject);
+    }
+    void Start()
+    {
         StartCoroutine(InitMap());
-        
     }
 
     IEnumerator InitMap()
@@ -250,10 +253,6 @@ public class ModuleMap : MonoBehaviour
         info.block.type = BLOCK_TYPE.BLOCK_LAND;
     }
 
-    void OnMapPersonUpdate(GameObject obj) {
-        UpdateMapNode(obj);
-    }
-
     void OnMapOwnerUpdate(GameObject obj) {
         var info = blocks[ToIndex(obj.transform.position)];
         for (int i = info.x - 1; i <= info.x + 1; ++i) {
@@ -272,63 +271,21 @@ public class ModuleMap : MonoBehaviour
     void OnMapItemSearch(Vector3 pos)
     {
         var items = new List<Item>();
-        var info = blocks[ToIndex(pos)];
-        for (int i = info.x - 1; i <= info.x + 1; ++i)
-        {
-            for (int j = info.y - 1; j <= info.y + 1; ++j)
-            {
-                if (Mathf.FloorToInt(-size_x/2) <= i && i <= Mathf.FloorToInt(size_x / 2) 
-                    && Mathf.FloorToInt(-size_y / 2) <= j && j <= Mathf.FloorToInt(size_y / 2))
+        foreach (var k  in nodes.Keys) {
+            var node = nodes[k];
+            if (null == node) {
+                nodes.Remove(k);
+                continue;
+            }
+            if (UtilityTool.IsRangeIn(pos, node.transform.position, 1)) {
+                var item = node.GetComponent<Item>();
+                if (null != item)
                 {
-                    var info_check = blocks[ToIndex(i, j)];
-                    foreach (var m in info_check.nodes.Keys) {
-                        if (null == info_check.nodes[m]) {
-                            info_check.nodes.Remove(m);
-                            nodes.Remove(m);
-                            continue;
-                        }
-                        var item = info_check.nodes[m].GetComponent<Item>();
-                        if (null != item)
-                        {
-                            items.Add(item);
-                        }
-                    }
+                    items.Add(item);
                 }
             }
         }
         MessageManager.GetInstance().Notify("ui_item_search", items);
-    }
-
-    void OnMapEnemySearch(GameObject obj)
-    {
-        var persons = new List<Person>();
-        var info = blocks[ToIndex(obj.transform.position)];
-        for (int i = info.x - 1; i <= info.x + 1; ++i)
-        {
-            for (int j = info.y - 1; j <= info.y + 1; ++j)
-            {
-                if (Mathf.FloorToInt(-size_x / 2) <= i && i <= Mathf.FloorToInt(size_x / 2)
-                    && Mathf.FloorToInt(-size_y / 2) <= j && j <= Mathf.FloorToInt(size_y / 2))
-                {
-                    var info_check = blocks[ToIndex(i, j)];
-                    foreach (var m in info_check.nodes.Keys)
-                    {
-                        if (null == info_check.nodes[m])
-                        {
-                            info_check.nodes.Remove(m);
-                            nodes.Remove(m);
-                            continue;
-                        }
-                        var person = info_check.nodes[m].GetComponent<Person>();
-                        if (null != person && obj != person.gameObject)
-                        {
-                            persons.Add(person);
-                        }
-                    }
-                }
-            }
-        }
-        MessageManager.GetInstance().Notify("ui_person_search", persons);
     }
 
     IEnumerator ScaleMap() {
@@ -396,32 +353,23 @@ public class ModuleMap : MonoBehaviour
     }
 
     IEnumerator EffectScaleMap() {
+        int x = 0, y = 0; 
         while (0 < rect_current.width && 0 < rect_current.height) {
             yield return new WaitForSeconds(1.0f);
-            var list_blocks = new Dictionary<int, InfoBlock>();
-            foreach (var kv in nodes)
+            foreach (var k in nodes.Keys)
             {
-                if (list_blocks.ContainsKey(kv.Value.index))
+                var node = nodes[k];
+                if (null == node)
                 {
+                    nodes.Remove(k);
                     continue;
                 }
-                if (kv.Value.x <= rect_current.x || kv.Value.x >= rect_current.x + rect_current.width
-                    || kv.Value.y <= rect_current.y || kv.Value.y >= rect_current.y + rect_current.height)
+                x = UtilityTool.ToIndexXY(node.transform.position.x);
+                y = UtilityTool.ToIndexXY(node.transform.position.y);
+                if (x < rect_current.x || x > rect_current.x + rect_current.width
+                    || y < rect_current.y || y > rect_current.y + rect_current.height)
                 {
-                    list_blocks.Add(kv.Value.index, kv.Value);
-                }
-            }
-            foreach (var kv in list_blocks)
-            {
-                foreach (var k in kv.Value.nodes.Keys)
-                {
-                    if (null == kv.Value.nodes[k])
-                    {
-                        kv.Value.nodes.Remove(k);
-                        nodes.Remove(k);
-                        continue;
-                    }
-                    var person = kv.Value.nodes[k].GetComponent<Person>();
+                    var person = node.GetComponent<Person>();
                     if (null != person)
                     {
                         person.hp -= 2;
@@ -444,10 +392,7 @@ public class ModuleMap : MonoBehaviour
     void AddTreasure() {
         var treasure = Instantiate(treasure_template, transform);
         treasure.transform.position = RandomPosition();
-        var index = ToIndex(treasure.transform.position);
-        var info = blocks[index];
-        info.nodes.Add(treasure.GetInstanceID(), treasure.gameObject);
-        nodes[treasure.GetInstanceID()] = info;
+        nodes[treasure.GetInstanceID()] = treasure.gameObject;
     }
 
     Vector3 RandomPosition() {
@@ -474,61 +419,31 @@ public class ModuleMap : MonoBehaviour
         enemy.transform.position = RandomPosition();
         enemy.attack = UnityEngine.Random.Range(10, 20);
         enemy.nm = string.Format("eny_{0}", index_enemy++);
-        var index = ToIndex(enemy.transform.position);
-        var info = blocks[index];
-        info.nodes.Add(enemy.GetInstanceID(), enemy.gameObject);
-        nodes[enemy.GetInstanceID()] = info;
+        nodes[enemy.GetInstanceID()] = enemy.gameObject;
     }
 
     void OnMapPersonRange(InfoParam3<List<Person>, Vector3, int> param) {
         param.param1 = new List<Person>();
-        int x = UtilityTool.ToIndexXY(param.param2.x);
-        int y = UtilityTool.ToIndexXY(param.param2.y);
-        int step = Mathf.FloorToInt(param.param3 / 2);
-        for (int i = x - step; i <= x + step; ++i) {
-            for (int j = y - step; j <= y + step; ++j) {
-                if (Mathf.FloorToInt(-size_x / 2) <= i && Mathf.FloorToInt(size_x / 2) >= i
-                    && Mathf.FloorToInt(-size_y / 2) <= j && Mathf.FloorToInt(size_y / 2) >= j) {
-                    var info = blocks[ToIndex(i, j)];
-                    foreach (var k in info.nodes.Keys) {
-                        if (null == info.nodes[k]) {
-                            info.nodes.Remove(k);
-                            nodes.Remove(k);
-                            continue;
-                        }
-                        var person = info.nodes[k].GetComponent<Person>();
-                        if (null != person) {
-                            param.param1.Add(person);
-                        }
-                    }
+        foreach (var k in nodes.Keys)
+        {
+            var node = nodes[k];
+            if (null == node)
+            {
+                nodes.Remove(k);
+                continue;
+            }
+            if (UtilityTool.IsRangeIn(param.param2, node.transform.position, param.param3))
+            {
+                var person = node.GetComponent<Person>();
+                if (null != person)
+                {
+                    param.param1.Add(person);
                 }
             }
         }
     }
 
-    void UpdateMapNode(GameObject obj)
-    {
-        InfoBlock info = null;
-        if (nodes.TryGetValue(obj.GetInstanceID(), out info)) {
-            foreach (var k in info.nodes.Keys)
-            {
-                if (null == info.nodes[k])
-                {
-                    info.nodes.Remove(k);
-                    nodes.Remove(k);
-                    continue;
-                }
-                if (obj == info.nodes[k])
-                {
-                    info.nodes.Remove(k);
-                    nodes.Remove(k);
-                    break;
-                }
-            }
-        }
-
-        info = blocks[ToIndex(obj.transform.position)];
-        info.nodes.Add(obj.GetInstanceID(), obj);
-        nodes[obj.GetInstanceID()] = info;
+    void OnMapNodeUpdate(GameObject node) {
+        nodes[node.GetInstanceID()] = node;
     }
 }

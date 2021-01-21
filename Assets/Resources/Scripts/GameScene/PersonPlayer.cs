@@ -8,6 +8,7 @@ public class PersonPlayer : Person
     {
         base.Start();
         MessageManager.GetInstance().Notify("ui_person_skill_update");
+        MessageManager.GetInstance().Notify("map_node_update", gameObject);
     }
     void OnEnable()
     {

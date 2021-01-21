@@ -55,4 +55,13 @@ public class UtilityTool
     {
         return Mathf.FloorToInt((d + 0.5f * block_size) / block_size);
     }
+
+    public static bool IsRangeIn(Vector3 pos_center, Vector3 pos_check, int range)
+    {
+        if (range >= Mathf.Abs(ToIndexXY(pos_check.x) - ToIndexXY(pos_center.x)) 
+            && range >= Mathf.Abs(ToIndexXY(pos_check.y) - ToIndexXY(pos_center.y))) {
+            return true;
+        }
+        return false;
+    }
 }

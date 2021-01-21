@@ -135,13 +135,25 @@ public class ModuleMove : MonoBehaviour
             pools.Add(n);
             var pos = n.transform.position;
             transform.DOMove(pos, 0.5f);
-            MessageManager.GetInstance().Notify("map_person_update", gameObject);
             MessageManager.GetInstance().Notify("map_block_update", pos);
             yield return new WaitForSeconds(0.5f);
             if (0 == paths.Count) {
                 //MessageManager.GetInstance().Notify("map_owner_update", gameObject);
                 MessageManager.GetInstance().Notify("map_item_search", pos);
-                MessageManager.GetInstance().Notify("map_enemy_search", gameObject);
+                var param = new InfoParam3<List<Person>, Vector3, int>() { param2 = transform.position, param3 = 2 };
+                MessageManager.GetInstance().Notify("map_person_range", param);
+                var enemys = new List<Person>();
+                var self = GetComponent<Person>();
+                foreach (var p in param.param1)
+                {
+                    if (p.camp != self.camp)
+                    {
+                        enemys.Add(p);
+                    }
+                }
+                if (0 < enemys.Count) {
+                    MessageManager.GetInstance().Notify("ui_person_search", enemys);
+                }
             }
         }
         flag_move = false;

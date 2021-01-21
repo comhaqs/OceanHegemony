@@ -71,7 +71,6 @@ public class PersonEnemy : Person
         for (int i = 0; i < paths.Count; ++i) {
             transform.DOMove(paths[i], 0.5f);
             yield return new WaitForSeconds(0.5f);
-            MessageManager.GetInstance().Notify("map_person_update", gameObject);
             MessageManager.GetInstance().Notify("map_block_update", transform.position);
         }
     }
