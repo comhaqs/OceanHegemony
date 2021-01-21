@@ -6,9 +6,11 @@ public class PersonPlayer : Person
 {
     public override void Start()
     {
+        nm = "自己";
         base.Start();
         MessageManager.GetInstance().Notify("ui_person_skill_update");
         MessageManager.GetInstance().Notify("map_node_update", gameObject);
+        MessageManager.GetInstance().Notify("ui_player_info_update", this as Person);
     }
     void OnEnable()
     {
@@ -29,5 +31,14 @@ public class PersonPlayer : Person
 
     void OnPersonPlayer(InfoParam1<Person> param) {
         param.param1 = this;
+    }
+
+    protected override void OnIncreaseMp()
+    {
+        var old_mp = mp;
+        base.OnIncreaseMp();
+        if (old_mp != mp) {
+            MessageManager.GetInstance().Notify("ui_player_mp_update", 1.0f * mp / mp_max);
+        }
     }
 }

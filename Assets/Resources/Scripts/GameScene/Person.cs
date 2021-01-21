@@ -14,6 +14,7 @@ public class Person : MonoBehaviour
     public TextMeshPro text_name;
     public int hp_max = 100;
     public int mp_max = 100;
+    public int mp_speed = 5;
     [HideInInspector]
     public int power { get { return self_power; } set { self_power = value; } }
 
@@ -22,7 +23,7 @@ public class Person : MonoBehaviour
     protected int self_hp = 100;
     public virtual void Start()
     {
-
+        StartCoroutine(IncreaseMp());
     }
 
     protected virtual void DoAttack(Person enemy)
@@ -39,6 +40,21 @@ public class Person : MonoBehaviour
         else
         {
 
+        }
+    }
+
+    IEnumerator IncreaseMp() {
+        while (true) {
+            yield return new WaitForSeconds(1.0f);
+            OnIncreaseMp();
+        }
+    }
+
+    protected virtual void OnIncreaseMp() {
+        mp += mp_speed;
+        if (mp > mp_max)
+        {
+            mp = mp_max;
         }
     }
 }
