@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3273957159812384678}
   - component: {fileID: 3273957159812384675}
   - component: {fileID: 3273957159812384676}
+  - component: {fileID: 7674369545493844454}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -97,11 +98,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 520a158d531725f4f85d7aa869406291, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nm: "\u81EA\u5DF1"
   attack: 15
-  hp: 100
   items: []
   camp: 1
+  text_name: {fileID: 0}
 --- !u!114 &3273957159812384675
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,3 +128,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   path_template: {fileID: 7354815126483103749, guid: a6467cfd7027adc47b3a541fd3cc0f7c, type: 3}
+--- !u!114 &7674369545493844454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3273957159812384680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3428e6c139f2e314a9beefd5a90f9601, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  digit_template: {fileID: 5092646746228933464, guid: fafecb9154633b140a2435cbda5c4dd2, type: 3}
+  move_offset: {x: 0, y: 1, z: 0}
+  time_duration: 2

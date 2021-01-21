@@ -102,11 +102,16 @@ public class PersonEnemy : Person
             if (2 == v)
             {
                 paths.Add(UtilityTool.ToPosition(x_last, y));
-                paths.Add(UtilityTool.ToPosition(x, y));
+                if (x != x_end && y != y_end) {
+                    paths.Add(UtilityTool.ToPosition(x, y));
+                }
             }
             else if (1 == v)
             {
-                paths.Add(UtilityTool.ToPosition(x, y));
+                if (x != x_end && y != y_end)
+                {
+                    paths.Add(UtilityTool.ToPosition(x, y));
+                }
             }
             else {
                 UtilityTool.LogError("位置错误:" + x_last + "," + y_last + " -> " + x + "," + y + " = " + v);

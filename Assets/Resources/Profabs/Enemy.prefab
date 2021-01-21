@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5940701383127000164}
   - component: {fileID: 6539325404555887886}
+  - component: {fileID: 3674078901263714580}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -46,10 +47,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attack: 10
-  hp: 100
   items: []
   camp: 2
   text_name: {fileID: 8490835713770214596}
+--- !u!114 &3674078901263714580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3710444149693279891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3428e6c139f2e314a9beefd5a90f9601, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  digit_template: {fileID: 5092646746228933464, guid: fafecb9154633b140a2435cbda5c4dd2, type: 3}
+  move_offset: {x: 0, y: 1, z: 0}
+  time_duration: 2
 --- !u!1 &6119812564062909892
 GameObject:
   m_ObjectHideFlags: 0
