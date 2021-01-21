@@ -43,7 +43,7 @@ public class ModuleMap : MonoBehaviour
         MessageManager.GetInstance().Add<InfoParam3<List<Vector3>, Vector3, Vector3>>("map_find_path", OnMapFindPath, gameObject);
         MessageManager.GetInstance().Add<Vector3>("map_block_update", OnMapBlockUpdate, gameObject);
         MessageManager.GetInstance().Add<GameObject>("map_owner_update", OnMapOwnerUpdate, gameObject);
-        MessageManager.GetInstance().Add<Vector3>("map_item_search", OnMapItemSearch, gameObject);
+        MessageManager.GetInstance().Add<InfoParam3<List<Item>, Vector3, int>>("map_item_search", OnMapItemSearch, gameObject);
         MessageManager.GetInstance().Add<InfoParam1<Vector3>>("map_position_random", OnMapPositionRandom, gameObject);
         MessageManager.GetInstance().Add<InfoParam3<List<Person>, Vector3, int>>("map_person_range", OnMapPersonRange, gameObject);
         MessageManager.GetInstance().Add<GameObject>("map_node_update", OnMapNodeUpdate, gameObject);
@@ -268,8 +268,9 @@ public class ModuleMap : MonoBehaviour
         }
     }
 
-    void OnMapItemSearch(Vector3 pos)
+    void OnMapItemSearch(InfoParam3<List<Item>, Vector3, int> param)
     {
+        param.param1 = new List<Item>();
         var items = new List<Item>();
         foreach (var k  in nodes.Keys) {
             var node = nodes[k];
@@ -277,7 +278,7 @@ public class ModuleMap : MonoBehaviour
                 nodes.Remove(k);
                 continue;
             }
-            if (UtilityTool.IsRangeIn(pos, node.transform.position, 1)) {
+            if (UtilityTool.IsRangeIn(param.param2, node.transform.position, param.param3)) {
                 var item = node.GetComponent<Item>();
                 if (null != item)
                 {
@@ -285,7 +286,6 @@ public class ModuleMap : MonoBehaviour
                 }
             }
         }
-        MessageManager.GetInstance().Notify("ui_item_search", items);
     }
 
     IEnumerator ScaleMap() {
@@ -354,7 +354,7 @@ public class ModuleMap : MonoBehaviour
 
     IEnumerator EffectScaleMap() {
         int x = 0, y = 0; 
-        while (0 < rect_current.width && 0 < rect_current.height) {
+        while (true) {
             yield return new WaitForSeconds(1.0f);
             foreach (var k in nodes.Keys)
             {
