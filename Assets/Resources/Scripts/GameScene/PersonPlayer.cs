@@ -2,11 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using System;
 
 public class PersonPlayer : Person
 {
     public ModulePath path_template;
-    List<ModulePath> paths = new List<ModulePath>();
+    public List<ModulePath> paths = new List<ModulePath>();
     List<ModulePath> pools = new List<ModulePath>();
     Vector3 pos_last;
     bool flag_move = false;
@@ -57,6 +58,11 @@ public class PersonPlayer : Person
 
     void OnPathPress(Vector3 pos)
     {
+        foreach (var p in paths) {
+            p.gameObject.SetActive(false);
+            pools.Add(p);
+        }
+        paths.Clear();
         var pos_normal = UtilityTool.NormalSize(pos);
         AddPath(pos_normal);
     }
@@ -106,9 +112,7 @@ public class PersonPlayer : Person
             {
                 x = Mathf.FloorToInt(x_start + t_x * i);
                 y = Mathf.FloorToInt(y_start + t_y * i);
-                var v = Mathf.Abs(x - x_last) + Mathf.Abs(y - y_last);
-                if (2 == v)
-                {
+                CalcAllPath((p_x, p_y)=> {
                     if (0 < pools.Count)
                     {
                         obj = pools[pools.Count - 1];
@@ -119,45 +123,15 @@ public class PersonPlayer : Person
                     {
                         obj = Instantiate(path_template);
                     }
-                    obj.transform.position = UtilityTool.ToPosition(x_last, y);
+                    obj.transform.position = UtilityTool.ToPosition(p_x, p_y);
                     paths.Add(obj);
-
-                    if (0 < pools.Count)
-                    {
-                        obj = pools[pools.Count - 1];
-                        pools.RemoveAt(pools.Count - 1);
-                        obj.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        obj = Instantiate(path_template);
-                    }
-                    obj.transform.position = UtilityTool.ToPosition(x, y);
-                    paths.Add(obj);
-                }
-                else if (1 == v)
-                {
-                    if (0 < pools.Count)
-                    {
-                        obj = pools[pools.Count - 1];
-                        pools.RemoveAt(pools.Count - 1);
-                        obj.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        obj = Instantiate(path_template);
-                    }
-                    obj.transform.position = UtilityTool.ToPosition(x, y);
-                    paths.Add(obj);
-                }
-                else
-                {
-                    UtilityTool.LogError("位置错误:" + x_last + "," + y_last + " -> " + x + "," + y + " = " + v);
-                }
+                }, x_last, y_last, x, y);
                 x_last = x;
                 y_last = y;
             }
             pos_last = pos;
+
+            CheckPath();
         }
     }
 
@@ -237,7 +211,8 @@ public class PersonPlayer : Person
         MessageManager.GetInstance().Notify("map_path_info", param);
         int mp_tmp = mp;
         int count_move = 0;
-        for (int i = 0; i < paths.Count; ++i) {
+        int i = 0;
+        for (; i < paths.Count; ++i) {
             if (mp_tmp >= paths[i].weight)
             {
                 paths[i].type = PathType.PATH_ALLOW;
@@ -245,13 +220,47 @@ public class PersonPlayer : Person
                 ++count_move;
             }
             else {
-                paths[i].type = PathType.PATH_FORBID;
+                break;
             }
+        }
+        for (; i < paths.Count; ++i)
+        {
+            paths[i].type = PathType.PATH_FORBID;
         }
         MessageManager.GetInstance().Notify("ui_action_move_update", 60 <= mp && 0 < count_move);
     }
 
     void OnActionMove() {
         OnMoveToPosition();
+    }
+
+    void CalcAllPath(Action<int, int> action, int x_start, int y_start, int x_end, int y_end) {
+        var x_step = x_end - x_start;
+        if (0 <= x_step)
+        {
+            for (int i = x_start + 1; i <= x_end; ++i)
+            {
+                action(i, y_start);
+            }
+        }
+        else {
+            for (int i = x_start - 1; i >= x_end; --i)
+            {
+                action(i, y_start);
+            }
+        }
+        var y_step = y_end - y_start;
+        if (0 <= y_step)
+        {
+            for (int j = y_start + 1; j <= y_end; ++j)
+            {
+                action(x_end, j);
+            }
+        }
+        else {
+            for (int j = y_start - 1; j >= y_end; --j) {
+                action(x_end, j);
+            }
+        }
     }
 }

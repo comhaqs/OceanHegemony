@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using System;
 
 public class PersonEnemy : Person
 {
@@ -97,27 +98,49 @@ public class PersonEnemy : Person
         for (int i = 1; i <= step_count; ++i) {
             x = Mathf.FloorToInt(x_start + t_x * i);
             y = Mathf.FloorToInt(y_start + t_y * i);
-            var v = Mathf.Abs(x - x_last) + Mathf.Abs(y - y_last);
-            if (2 == v)
-            {
-                paths.Add(UtilityTool.ToPosition(x_last, y));
-                if (x != x_end && y != y_end) {
-                    paths.Add(UtilityTool.ToPosition(x, y));
-                }
-            }
-            else if (1 == v)
-            {
-                if (x != x_end && y != y_end)
+            CalcAllPath((p_x, p_y)=> {
+                if (p_x != x_end && p_y != y_end)
                 {
-                    paths.Add(UtilityTool.ToPosition(x, y));
+                    paths.Add(UtilityTool.ToPosition(p_x, p_y));
                 }
-            }
-            else {
-                UtilityTool.LogError("位置错误:" + x_last + "," + y_last + " -> " + x + "," + y + " = " + v);
-            }
+            }, x_last, y_last, x, y);
             x_last = x;
             y_last = y;
         }
         return paths;
+    }
+
+    void CalcAllPath(Action<int, int> action, int x_start, int y_start, int x_end, int y_end)
+    {
+        var x_step = x_end - x_start;
+        if (0 <= x_step)
+        {
+            for (int i = x_start + 1; i <= x_end; ++i)
+            {
+                action(i, y_start);
+            }
+        }
+        else
+        {
+            for (int i = x_start - 1; i >= x_end; --i)
+            {
+                action(i, y_start);
+            }
+        }
+        var y_step = y_end - y_start;
+        if (0 <= y_step)
+        {
+            for (int j = y_start + 1; j <= y_end; ++j)
+            {
+                action(x_end, j);
+            }
+        }
+        else
+        {
+            for (int j = y_start - 1; j >= y_end; --j)
+            {
+                action(x_end, j);
+            }
+        }
     }
 }
