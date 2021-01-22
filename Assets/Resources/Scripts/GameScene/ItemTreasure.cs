@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class ItemTreasure : Item
 {
     public List<Item> item_templates;
-    [HideInInspector]
+    public int item_max = 8;
     public List<Item> items = new List<Item>();
     void Start()
     {

@@ -9,7 +9,8 @@ public class Person : MonoBehaviour
     public int attack = 0;
     public int hp { get { return self_hp; } set { var hp_old = self_hp; self_hp = value; if (0 > self_hp) { self_hp = 0; } GetComponent<ModuleDigitDisplay>().AddDigit( (hp_old - self_hp).ToString()); } }
     public int mp = 100;
-    public List<Item> items = new List<Item>(4);
+    public List<Item> items = new List<Item>();
+    public int item_max = 4;
     public int camp = 0;
     public TextMeshPro text_name;
     public int hp_max = 100;

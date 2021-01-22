@@ -21,7 +21,7 @@ public class UiDlgItemSelect : MonoBehaviour
         for (int i = 0; i < package_person.Count; ++i) {
             var select_package = package_person[i];
             select_package.bt.onClick.AddListener(()=>{
-                if (null == treasure || null == person)
+                if (null == treasure || null == person || treasure.item_max <= treasure.items.Count)
                 {
                     return;
                 }
@@ -39,7 +39,7 @@ public class UiDlgItemSelect : MonoBehaviour
         {
             var select_package = package_treasure[i];
             select_package.bt.onClick.AddListener(() => {
-                if (null == treasure || null == person)
+                if (null == treasure || null == person || person.item_max <= person.items.Count)
                 {
                     return;
                 }
