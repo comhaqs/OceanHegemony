@@ -251,7 +251,9 @@ public class ModuleMap : MonoBehaviour
 
     void OnMapBlockUpdate(Vector3 pos) {
         var info = blocks[ToIndex(pos)];
-        info.block.type = BLOCK_TYPE.BLOCK_LAND;
+        if (BLOCK_TYPE.BLOCK_SELF != info.block.type) {
+            info.block.type = BLOCK_TYPE.BLOCK_LAND;
+        }
     }
 
     void OnMapOwnerUpdate(Person person) {

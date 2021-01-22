@@ -36,6 +36,11 @@ public class PersonPlayer : Person
         MessageManager.GetInstance().Add("player_skill_update", OnPlayerSkillUpdate, gameObject);
     }
 
+    protected override void OnHpChange(int hp_new) {
+        base.OnHpChange(hp_new);
+        MessageManager.GetInstance().Notify("ui_player_hp_update", 1.0f * hp / hp_max);
+    }
+
     void OnPersonTouchItem(GameObject obj)
     {
         MessageManager.GetInstance().Notify("ui_item_select", new InfoParam2<GameObject, GameObject>() { param1 = obj, param2 = gameObject});

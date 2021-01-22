@@ -7,7 +7,7 @@ public class Person : MonoBehaviour
 {
     public string nm { get { return self_name; } set { self_name = value; if (null != text_name) { text_name.text = self_name; } } }
     public int attack = 0;
-    public int hp { get { return self_hp; } set { var hp_old = self_hp; self_hp = value; if (0 > self_hp) { self_hp = 0; } GetComponent<ModuleDigitDisplay>().AddDigit( (hp_old - self_hp).ToString()); } }
+    public int hp { get { return self_hp; } set { OnHpChange(value); } }
     public int mp = 100;
     public List<Item> items = new List<Item>();
     public int item_max = 4;
@@ -56,5 +56,27 @@ public class Person : MonoBehaviour
         {
             mp = mp_max;
         }
+    }
+
+    protected virtual void OnHpChange(int hp_new)
+    {
+        var hp_old = self_hp;
+        self_hp = hp_new;
+        if (0 > self_hp)
+        {
+            self_hp = 0;
+        }
+        if (0 < hp_old - self_hp)
+        {
+            GetComponent<ModuleDigitDisplay>().AddDigit(string.Format("{0}", self_hp - hp_old));
+        }
+        else if (0 == hp_old - self_hp) {
+            GetComponent<ModuleDigitDisplay>().AddDigit(string.Format("0"));
+        }
+        else
+        {
+            GetComponent<ModuleDigitDisplay>().AddDigit(string.Format("+{0}", hp_old - self_hp));
+        }
+        
     }
 }
