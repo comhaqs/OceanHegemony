@@ -78,6 +78,7 @@ public class PersonPlayer : Person
         //OnMoveToPosition();
     }
 
+    int index_path = 0;
     void AddPath(Vector3 pos)
     {
         if (flag_move)
@@ -122,6 +123,7 @@ public class PersonPlayer : Person
                     else
                     {
                         obj = Instantiate(path_template);
+                        obj.name = string.Format("path_{0}", index_path++);
                     }
                     obj.transform.position = UtilityTool.ToPosition(p_x, p_y);
                     paths.Add(obj);
@@ -149,15 +151,16 @@ public class PersonPlayer : Person
         MessageManager.GetInstance().Notify("ui_item_search", new List<Item>());
         MessageManager.GetInstance().Notify("ui_person_search", new List<Person>());
         var paths_tmp = new List<ModulePath>();
-        for (int i = 0; i < paths.Count; ++i) {
+        int i = 0;
+        for (; i < paths.Count; ++i) {
             if (mp < paths[i].weight)
             {
-                paths.RemoveRange(0, i);
                 break;
             }
             mp -= paths[i].weight;
             paths_tmp.Add(paths[i]);
         }
+        paths.RemoveRange(0, i);
         if (0 < paths_tmp.Count)
         {
             MessageManager.GetInstance().Notify("ui_player_mp_update", 1.0f * mp / mp_max);
@@ -169,28 +172,8 @@ public class PersonPlayer : Person
                 transform.DOMove(pos, 0.5f);
                 MessageManager.GetInstance().Notify("map_block_update", pos);
                 yield return new WaitForSeconds(0.5f);
-
             }
-            //MessageManager.GetInstance().Notify("map_owner_update", gameObject);
-            var param_item = new InfoParam3<List<Item>, Vector3, int>() { param2 = transform.position, param3 = 1 };
-            MessageManager.GetInstance().Notify("map_item_search", param_item);
-            MessageManager.GetInstance().Notify("ui_item_search", param_item.param1);
-
-            var param = new InfoParam3<List<Person>, Vector3, int>() { param2 = transform.position, param3 = 2 };
-            MessageManager.GetInstance().Notify("map_person_range", param);
-            var enemys = new List<Person>();
-            var self = GetComponent<Person>();
-            foreach (var p in param.param1)
-            {
-                if (p.camp != self.camp)
-                {
-                    enemys.Add(p);
-                }
-            }
-            if (0 < enemys.Count)
-            {
-                MessageManager.GetInstance().Notify("ui_person_search", enemys);
-            }
+            MessageManager.GetInstance().Notify("map_owner_update", this as Person);
         }
         flag_move = false;
     }
@@ -200,6 +183,8 @@ public class PersonPlayer : Person
             yield return new WaitForSeconds(1.0f);
 
             CheckPath();
+            CheckListItem();
+            CheckListPerson();
         }
     }
 
@@ -228,6 +213,26 @@ public class PersonPlayer : Person
             paths[i].type = PathType.PATH_FORBID;
         }
         MessageManager.GetInstance().Notify("ui_action_move_update", 60 <= mp && 0 < count_move);
+    }
+
+    void CheckListItem() {
+        var param = new InfoParam3<List<Item>, Vector3, int>() { param2 = transform.position, param3 = 1 };
+        MessageManager.GetInstance().Notify("map_item_search", param);
+        MessageManager.GetInstance().Notify("ui_item_search", param.param1);
+    }
+
+    void CheckListPerson() {
+        var param = new InfoParam3<List<Person>, Vector3, int>() { param2 = transform.position, param3 = 2 };
+        MessageManager.GetInstance().Notify("map_person_range", param);
+        var enemys = new List<Person>();
+        foreach (var p in param.param1)
+        {
+            if (p.camp != camp)
+            {
+                enemys.Add(p);
+            }
+        }
+        MessageManager.GetInstance().Notify("ui_person_search", enemys);
     }
 
     void OnActionMove() {

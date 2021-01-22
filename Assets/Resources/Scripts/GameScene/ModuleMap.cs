@@ -12,7 +12,7 @@ public class InfoBlock {
     public int H = 0;
     public ModuleBlock block;
     public InfoBlock parent;
-    public GameObject owner;
+    public Person owner;
 }
 
 public class ModuleMap : MonoBehaviour
@@ -42,7 +42,7 @@ public class ModuleMap : MonoBehaviour
         }
         MessageManager.GetInstance().Add<InfoParam3<List<Vector3>, Vector3, Vector3>>("map_find_path", OnMapFindPath, gameObject);
         MessageManager.GetInstance().Add<Vector3>("map_block_update", OnMapBlockUpdate, gameObject);
-        MessageManager.GetInstance().Add<GameObject>("map_owner_update", OnMapOwnerUpdate, gameObject);
+        MessageManager.GetInstance().Add<Person>("map_owner_update", OnMapOwnerUpdate, gameObject);
         MessageManager.GetInstance().Add<InfoParam3<List<Item>, Vector3, int>>("map_item_search", OnMapItemSearch, gameObject);
         MessageManager.GetInstance().Add<InfoParam1<Vector3>>("map_position_random", OnMapPositionRandom, gameObject);
         MessageManager.GetInstance().Add<InfoParam3<List<Person>, Vector3, int>>("map_person_range", OnMapPersonRange, gameObject);
@@ -254,15 +254,17 @@ public class ModuleMap : MonoBehaviour
         info.block.type = BLOCK_TYPE.BLOCK_LAND;
     }
 
-    void OnMapOwnerUpdate(GameObject obj) {
-        var info = blocks[ToIndex(obj.transform.position)];
+    void OnMapOwnerUpdate(Person person) {
+        var info = blocks[ToIndex(person.transform.position)];
         for (int i = info.x - 1; i <= info.x + 1; ++i) {
-            for (int j = info.y - 1; j <= info.y + 1; ++i) {
-                if (0 <= i && i < size_x && 0 <=j && j < size_y) {
+            for (int j = info.y - 1; j <= info.y + 1; ++j) {
+                if (Mathf.FloorToInt(-size_x/2) <= i && i <= Mathf.FloorToInt(size_x / 2) 
+                    && Mathf.FloorToInt(-size_y / 2) <= j && j <= Mathf.FloorToInt(size_y / 2))
+                {
                     var info_check = blocks[ToIndex(i, j)];
                     if (BLOCK_TYPE.BLOCK_OCEAN != info_check.block.type) {
                         info_check.block.type = BLOCK_TYPE.BLOCK_SELF;
-                        info_check.owner = obj;
+                        info_check.owner = person;
                     }
                 }
             }
