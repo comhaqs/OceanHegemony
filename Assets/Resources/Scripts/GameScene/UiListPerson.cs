@@ -11,7 +11,7 @@ public class UiListPerson : MonoBehaviour
     List<Person> nodes;
     private void OnEnable()
     {
-        MessageManager.GetInstance().Add<List<Person>>("ui_person_search", OnUiItemSearch, gameObject);
+        MessageManager.GetInstance().Add<List<Person>>("ui_player_person_update", OnUiIPlayerPersonUpdate, gameObject);
     }
     public virtual void Start()
     {
@@ -30,17 +30,22 @@ public class UiListPerson : MonoBehaviour
         }
     }
 
-    void OnUiItemSearch(List<Person> ps)
+    void OnUiIPlayerPersonUpdate(List<Person> ps)
     {
         nodes = ps;
         foreach (var b in touchs)
         {
             b.gameObject.SetActive(false);
         }
-        for (int i = 0; i < nodes.Count && i < touchs.Count; ++i)
+        for (int i = Mathf.Min(nodes.Count - 1, touchs.Count - 1); i >= 0; --i)
         {
+            if (null == nodes[i]) {
+                nodes.RemoveAt(i);
+                continue;
+            }
             touchs[i].gameObject.SetActive(true);
             touchs[i].nm.text = nodes[i].nm;
+            touchs[i].bt.interactable = nodes[i].flag_show;
         }
     }
 }

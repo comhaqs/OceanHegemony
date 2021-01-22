@@ -8,6 +8,7 @@ public class PersonPlayer : Person
 {
     public ModulePath path_template;
     public List<ModulePath> paths = new List<ModulePath>();
+    public int mp_attack = 80;
     List<ModulePath> pools = new List<ModulePath>();
     Vector3 pos_last;
     bool flag_move = false;
@@ -16,7 +17,6 @@ public class PersonPlayer : Person
     {
         nm = "自己";
         base.Start();
-        MessageManager.GetInstance().Notify("ui_person_skill_update");
         MessageManager.GetInstance().Notify("map_node_update", gameObject);
         MessageManager.GetInstance().Notify("ui_player_info_update", this as Person);
         StartCoroutine(CheckMp());
@@ -31,6 +31,9 @@ public class PersonPlayer : Person
         MessageManager.GetInstance().Add<Vector3>("ui_touch_release", OnPathRelease, gameObject);
         MessageManager.GetInstance().Add("move_to_postion", OnMoveToPosition, gameObject);
         MessageManager.GetInstance().Add("action_move", OnActionMove, gameObject);
+        MessageManager.GetInstance().Add<Item>("player_item_click", OnPlayerItemClick, gameObject);
+        MessageManager.GetInstance().Add<ItemSkill>("player_skill_click", OnPlayerSkillClick, gameObject);
+        MessageManager.GetInstance().Add("player_skill_update", OnPlayerSkillUpdate, gameObject);
     }
 
     void OnPersonTouchItem(GameObject obj)
@@ -40,6 +43,10 @@ public class PersonPlayer : Person
 
     void OnUiPersonClick(Person enemy)
     {
+        if (mp < mp_attack) {
+            return;
+        }
+        mp -= mp_attack;
         DoAttack(enemy);
     }
 
@@ -148,8 +155,8 @@ public class PersonPlayer : Person
             yield break;
         }
         flag_move = true;
-        MessageManager.GetInstance().Notify("ui_item_search", new List<Item>());
-        MessageManager.GetInstance().Notify("ui_person_search", new List<Person>());
+        MessageManager.GetInstance().Notify("ui_player_item_update", new List<Item>());
+        MessageManager.GetInstance().Notify("ui_player_person_update", new List<Person>());
         var paths_tmp = new List<ModulePath>();
         int i = 0;
         for (; i < paths.Count; ++i) {
@@ -185,6 +192,7 @@ public class PersonPlayer : Person
             CheckPath();
             CheckListItem();
             CheckListPerson();
+            CheckListSkill();
         }
     }
 
@@ -218,7 +226,10 @@ public class PersonPlayer : Person
     void CheckListItem() {
         var param = new InfoParam3<List<Item>, Vector3, int>() { param2 = transform.position, param3 = 1 };
         MessageManager.GetInstance().Notify("map_item_search", param);
-        MessageManager.GetInstance().Notify("ui_item_search", param.param1);
+        foreach (var t in param.param1) {
+            t.flag_show = mp >= t.mp;
+        }
+        MessageManager.GetInstance().Notify("ui_player_item_update", param.param1);
     }
 
     void CheckListPerson() {
@@ -230,9 +241,17 @@ public class PersonPlayer : Person
             if (p.camp != camp)
             {
                 enemys.Add(p);
+                p.flag_show = mp >= mp_attack;
             }
         }
-        MessageManager.GetInstance().Notify("ui_person_search", enemys);
+        MessageManager.GetInstance().Notify("ui_player_person_update", enemys);
+    }
+
+    void CheckListSkill() {
+        foreach (var t in items) {
+            t.flag_show = mp >= t.mp;
+        }
+        MessageManager.GetInstance().Notify("ui_person_skill_update", items);
     }
 
     void OnActionMove() {
@@ -267,5 +286,34 @@ public class PersonPlayer : Person
                 action(x_end, j);
             }
         }
+    }
+
+    void OnPlayerItemClick(Item item) {
+        if (mp < item.mp) {
+            return;
+        }
+        mp -= item.mp;
+        MessageManager.GetInstance().Notify("ui_item_click", item);
+    }
+
+    void OnPlayerSkillClick(ItemSkill skill)
+    {
+        if (mp < skill.mp)
+        {
+            return;
+        }
+        mp -= skill.mp;
+        for (int i = items.Count - 1; i >= 0; --i) {
+            if (skill.GetInstanceID() == items[i].GetInstanceID()) {
+                items.RemoveAt(i);
+                break;
+            }
+        }
+        skill.OnAction();
+        CheckListSkill();
+    }
+
+    void OnPlayerSkillUpdate() {
+        CheckListSkill();
     }
 }

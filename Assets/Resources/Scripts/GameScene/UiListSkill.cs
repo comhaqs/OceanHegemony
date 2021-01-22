@@ -9,7 +9,7 @@ public class UiListSkill : MonoBehaviour
     List<Item> nodes;
     private void OnEnable()
     {
-        MessageManager.GetInstance().Add("ui_person_skill_update", OnUiPersonSkillUpdate, gameObject);
+        MessageManager.GetInstance().Add<List<Item>>("ui_person_skill_update", OnUiPersonSkillUpdate, gameObject);
     }
     public virtual void Start()
     {
@@ -21,10 +21,8 @@ public class UiListSkill : MonoBehaviour
                 if (null != nodes && index < nodes.Count)
                 {
                     var skill = nodes[index].GetComponent<ItemSkill>();
-                    nodes.RemoveAt(index);
-                    UpdateUi();
                     if (null != skill) {
-                        skill.OnAction();
+                        MessageManager.GetInstance().Notify("player_skill_click", skill);
                     }
                 }
             });
@@ -32,14 +30,9 @@ public class UiListSkill : MonoBehaviour
         }
     }
 
-    void OnUiPersonSkillUpdate()
+    void OnUiPersonSkillUpdate(List<Item> items)
     {
-        var param = new InfoParam1<Person>();
-        MessageManager.GetInstance().Notify("person_player", param);
-        if (null == param.param1) {
-            return;
-        }
-        nodes = param.param1.items;
+        nodes = items;
         UpdateUi();
     }
 
@@ -48,10 +41,16 @@ public class UiListSkill : MonoBehaviour
         {
             b.gameObject.SetActive(false);
         }
-        for (int i = 0; i < nodes.Count && i < touchs.Count; ++i)
+        for (int i = Mathf.Min(nodes.Count - 1, touchs.Count - 1); i >= 0; --i)
         {
+            if (null == nodes[i])
+            {
+                nodes.RemoveAt(i);
+                continue;
+            }
             touchs[i].gameObject.SetActive(true);
             touchs[i].img.sprite = Resources.Load<Sprite>(nodes[i].icon_file);
+            touchs[i].bt.interactable = nodes[i].flag_show;
         }
     }
 }

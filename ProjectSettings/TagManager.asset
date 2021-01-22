@@ -14,9 +14,9 @@ TagManager:
   - 
   - 
   - Background
-  - 
-  - 
-  - 
+  - Effective
+  - Path
+  - Fog
   - 
   - 
   - 
@@ -41,6 +41,18 @@ TagManager:
   - name: Background
     uniqueID: 482194491
     locked: 0
+  - name: Path
+    uniqueID: 2298356987
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Fog
+    uniqueID: 134830475
+    locked: 0
+  - name: Effective
+    uniqueID: 3185389481
+    locked: 0
+  - name: UI
+    uniqueID: 1594565391
     locked: 0

@@ -44,3 +44,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   icon_file: Sprites/Item_1
+  mp: 70
+  flag_show: 1

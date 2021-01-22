@@ -10,7 +10,7 @@ public class UiListItem : MonoBehaviour
     List<Item> nodes;
     private void OnEnable()
     {
-        MessageManager.GetInstance().Add<List<Item>>("ui_item_search", OnUiItemSearch, gameObject);
+        MessageManager.GetInstance().Add<List<Item>>("ui_player_item_update", OnUiIPlayerItemUpdate, gameObject);
     }
     public virtual void Start()
     {
@@ -21,23 +21,29 @@ public class UiListItem : MonoBehaviour
             {
                 if (null != nodes && index < nodes.Count)
                 {
-                    MessageManager.GetInstance().Notify("ui_item_click", nodes[index]);
+                    MessageManager.GetInstance().Notify("player_item_click", nodes[index]);
                 }
             });
             touchs[i].gameObject.SetActive(false);
         }
     }
 
-    void OnUiItemSearch(List<Item> ps)
+    void OnUiIPlayerItemUpdate(List<Item> ps)
     {
         nodes = ps;
         foreach (var b in touchs)
         {
             b.gameObject.SetActive(false);
         }
-        for (int i = 0; i < nodes.Count && i < touchs.Count; ++i) {
+        for (int i = Mathf.Min(nodes.Count - 1, touchs.Count - 1); i >= 0; --i) {
+            if (null == nodes[i])
+            {
+                nodes.RemoveAt(i);
+                continue;
+            }
             touchs[i].gameObject.SetActive(true);
             touchs[i].img.sprite = Resources.Load<Sprite>(nodes[i].icon_file);
+            touchs[i].bt.interactable = nodes[i].flag_show;
         }
     }
 }
