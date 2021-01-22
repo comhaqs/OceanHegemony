@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6961370463060755812}
-  - component: {fileID: 7511621551209523629}
+  - component: {fileID: 7122747967643970517}
   m_Layer: 0
   m_Name: ItemSkill3
   m_TagString: Untagged
@@ -31,7 +31,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7511621551209523629
+--- !u!114 &7122747967643970517
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -40,9 +40,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 799505009281905368}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd1522bcbbbfac947a20fb05193956e9, type: 3}
+  m_Script: {fileID: 11500000, guid: 40d2ff4ee9c08b244a1cb3c4a6235661, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   icon_file: Sprites/Item_3
-  mp: 70
+  mp: 80
   flag_show: 1
+  range: 5
+  bullet_template: {fileID: 1070080139549821205, guid: 7a64af857732b8d488499ca98ee90b9a, type: 3}
+  attack_min: 10
+  attack_max: 20

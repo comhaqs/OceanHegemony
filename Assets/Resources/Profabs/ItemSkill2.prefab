@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8659819044107097248}
-  - component: {fileID: 9176403001052732071}
+  - component: {fileID: -1121729295526462137}
   m_Layer: 0
   m_Name: ItemSkill2
   m_TagString: Untagged
@@ -31,7 +31,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9176403001052732071
+--- !u!114 &-1121729295526462137
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -40,9 +40,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 5330063469009719325}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd1522bcbbbfac947a20fb05193956e9, type: 3}
+  m_Script: {fileID: 11500000, guid: 29cd4c25ffc153743b5c4c455ee0a692, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   icon_file: Sprites/Item_2
-  mp: 70
+  mp: 10
   flag_show: 1
+  mp_speed_min: 5
+  mp_speed_max: 15
+  time_min: 20
+  time_max: 40

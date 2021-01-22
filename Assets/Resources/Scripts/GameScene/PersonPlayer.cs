@@ -314,7 +314,7 @@ public class PersonPlayer : Person
                 break;
             }
         }
-        skill.OnAction();
+        skill.OnAction(this as Person);
         CheckListSkill();
     }
 

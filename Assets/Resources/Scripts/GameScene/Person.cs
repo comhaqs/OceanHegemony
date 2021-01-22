@@ -52,6 +52,9 @@ public class Person : MonoBehaviour
 
     protected virtual void OnIncreaseMp() {
         mp += mp_speed;
+        if (0 > mp) {
+            mp = 0;
+        }
         if (mp > mp_max)
         {
             mp = mp_max;
@@ -65,6 +68,9 @@ public class Person : MonoBehaviour
         if (0 > self_hp)
         {
             self_hp = 0;
+        }
+        if (hp_max < self_hp) {
+            self_hp = hp_max;
         }
         if (0 < hp_old - self_hp)
         {
